@@ -5,12 +5,12 @@
 #include <cmath>
 
 int n,m, drnum, mnnum, wlnum;
-int source[2];
 using namespace std;
 
 void printGrid(char *grid);
 
 int main(void){
+    int source[2];
     cin >> n >> m;
     char grid[2 * n+1][2 * m+1];
     for (int i = 0; i <= n; i++)
