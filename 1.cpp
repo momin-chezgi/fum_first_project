@@ -8,6 +8,7 @@ int n,m, drnum, mnnum, wlnum;
 using namespace std;
 
 void printGrid(char *grid);
+void clearScreen();
 
 int main(void){
     int source[2];
@@ -57,7 +58,7 @@ int main(void){
 }
 
 void printGrid(char *grid){
-    system("clear");
+    clearScreen();
     for (int i = 0; i <= 2*n; i++)
     {
         for(int j=0; j <= 2*m; j++){
@@ -65,4 +66,12 @@ void printGrid(char *grid){
         }
         cout << endl;
     }
+}
+
+void clearScreen() {
+#ifdef _WIN32
+    system("cls"); // For Windows
+#else
+    system("clear"); // For Unix-based systems
+#endif
 }
