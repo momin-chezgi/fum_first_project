@@ -1,21 +1,60 @@
-#include <iostream>
-#include <cmath>
-#include <algorithm>
+#include "DSU.h"
+#include "importer.h"
+#define cell Node
+
 using namespace std;
 
-int n, m, drnum, mnnum, wlnum;
+int n, m;
+int drnum, mnnum, wlnum;
+/*
+ limits of  this variables:
+    drnum+mnnum : [1 , (n*m)/9]
+        why? because each draftman/monster
+                  threatens up to 8 cells around it that 
+                  can't contain monsters/draftsmen.
+    wlnum : [0 , n*m - n - m]
+*/
+
+pair<int,int> place_the_lightsource(vector<vector<char>>& shown_grid);
+void put_the_walls();
+void place_the_draftsmen();
+void place_the_monsters();
 
 
 int main(){
-    cin >> n >> m;
-    cin >> drnum >> mnnum >> wlnum;
-    char grid[2 * n + 1][2 * m + 1];
+    importer();
+
+    cell grid[n][m];
+    vector<vector<char>> shown_grid(2 * n + 1, vector<char>(2 * m + 1));
+
+    // initialize the corners
     for (int i = 0; i <= n; i++) {
         for (int j = 0; j <= m; j++) {
-            grid[2 * i][2 * j] = '#';
+            shown_grid[2 * i][2 * j] = '#';
         }
     }
+    pair<int,int> light_source_pos = place_the_lightsource(shown_grid);
+
     return 0;
 }
 
-void createMaze();
+pair<int,int> place_the_lightsource(vector<vector<char>>& shown_grid){
+    int i = rand() % n;
+    int j = rand() % m;
+    shown_grid[2 * i + 1][2 * j + 1] = 'S';
+    return {i, j};
+}
+
+//Check it !
+void put_the_walls(pair<int, int> light_source_pos, vector<vector<char>>& shown_grid){
+    int walls_placed = 0;
+    while (walls_placed < wlnum) {
+        int i = rand() % n;
+        int j = rand() % m;
+        if (shown_grid[2 * i + 1][2 * j + 1] == '.' && (i != light_source_pos.first || j != light_source_pos.second)) {
+            shown_grid[2 * i + 1][2 * j + 1] = '#';
+            walls_placed++;
+        }
+    }
+
+}
