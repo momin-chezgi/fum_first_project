@@ -15,11 +15,14 @@ int drnum, mnnum, wlnum;
     wlnum : [0 , n*m - n - m]
 */
 
+// main chain of functions:
 pair<int,int> place_the_lightsource(vector<vector<char>>& shown_grid);
-void put_the_walls();
+void put_the_walls(pair<int, int> light_source_pos, vector<vector<char>>& shown_grid);
 void place_the_draftsmen();
 void place_the_monsters();
 
+// sub-algorithms:
+void fix_the_wrong_walls(int x, int y, int *direction);
 
 int main(){
     importer();
@@ -49,12 +52,57 @@ pair<int,int> place_the_lightsource(vector<vector<char>>& shown_grid){
 void put_the_walls(pair<int, int> light_source_pos, vector<vector<char>>& shown_grid){
     int walls_placed = 0;
     while (walls_placed < wlnum) {
-        int i = rand() % n;
-        int j = rand() % m;
-        if (shown_grid[2 * i + 1][2 * j + 1] == '.' && (i != light_source_pos.first || j != light_source_pos.second)) {
-            shown_grid[2 * i + 1][2 * j + 1] = '#';
-            walls_placed++;
+        int i1 = rand() % n;
+        int j1 = rand() % m;
+        int direction = rand() % 4;
+        // 0 : right       1: up        2: left       3: down
+        // now  how to prevent from placing walls in the edge of grid?
+        direction = fix_the_wrong_walls(i1, j1, direction);
+    }
+}
+
+int  fix_the_wrong_walls(int i1, int j1, int direction){
+    if (i1 == 0)
+    {
+        if (j1 == 0 && (direction == 1 || direction == 2))
+        {
+            direction == 1 ? direction = 0 : direction = 3;
+        }
+        else if (j1 == n - 1 && (direction == 0 || direction == 1))
+        {
+            direction == 0 ? direction = 2 : direction = 3;
+        }
+        else
+        {
+            if (direction == 1)
+                direction = 3;
         }
     }
 
+    if (i1 == n - 1)
+    {
+        if (j1 == 0 && (direction == 2 || direction == 3)){
+            direction == 2 ? direction = 0 : direction = 1;
+        }
+        else if (j1 == n - 1 && (direction == 0 || direction == 3))
+        {
+            direction == 0 ? direction = 2 : direction = 1;
+        }
+        else
+        {
+            if (direction == 3)
+                direction = 1;
+        }
+    }
+
+    if (j1 == 0 && direction == 2)
+    {
+        direction = 0;
+    }
+
+    if (j1 == m - 1 && direction == 0)
+    {
+        direction = 2;
+    }
+    return direction;
 }
