@@ -3,9 +3,7 @@
 
 #include "includer.h"
 #include "DSU.h"
-#define cell Node
-#define vec2d(type) vector<vector<type>>
-#define intpair pair<int,int>
+
 using namespace std;
 
 int n, m;
@@ -37,7 +35,7 @@ pair<intpair, intpair> shown2real_coord(int a, int b, char cell_type);
 bool are_there_no_enemy_nearby(vec2d(char) & shown_grid, int i, int j, char cell_type);
 
 // main function
-int mazegenerator( int n_input  = n, int m_input = m,
+int mazegenerator( vec2d(char) &shown_grid, int n_input  = n, int m_input = m,
                   int drnum_input = drnum, int mnnum_input = mnnum,
                   int wlnum_input = wlnum){
     // if you want to give some parameters fill others with -1;
@@ -50,7 +48,6 @@ int mazegenerator( int n_input  = n, int m_input = m,
 
     vec2d(cell) grid(n, vector<cell>(m));
     vec2d(int) connected(n, vector<int>(m, 0));
-    vec2d(char) shown_grid(2 * n + 1, vector<char>(2 * m + 1));
 
     // initialize cells, corners and the space between cells that will be placed by walls later
     for (int i = 0; i <= n; i++)

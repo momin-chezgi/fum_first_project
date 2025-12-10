@@ -1,5 +1,5 @@
-#ifndef importer_H
-#define importer_H
+#ifndef INTERPRETER_H
+#define INTERPRETER_H
 
 #include "includer.h"
 
@@ -93,4 +93,35 @@ void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
     cout << string(50, '-') << endl;;
 }
 
-#endif // importer_H
+void print_the_status(vec2d(char)& shown_grid){
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+    
+    #ifdef _WIN32 // Clear entire console buffer and reset cursor 
+        (avoids system("cls")) HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); 
+        if (hOut != INVALID_HANDLE_VALUE) { 
+            CONSOLE_SCREEN_BUFFER_INFO csbi; 
+            if (GetConsoleScreenBufferInfo(hOut, &csbi)) { 
+                DWORD count; 
+                DWORD cellCount = csbi.dwSize.X * csbi.dwSize.Y;
+                COORD home = { 0, 0 }; 
+                FillConsoleOutputCharacterA(hOut, ' ', cellCount, home, &count);
+                FillConsoleOutputAttribute(hOut, csbi.wAttributes, cellCount, home, &count);
+                SetConsoleCursorPosition(hOut, home); } } 
+    #else // Clear full screen and move cursor home
+        cout << "\x1B[2J\x1B[H";
+    #endif
+
+    for(int i =0; i < shown_grid.size(); i++){
+        for(int j =0; j < shown_grid[0].size(); j++){
+            cout << shown_grid[i][j];
+        }
+        cout << endl;
+    }
+}
+
+
+#endif // iNTERPRETER_H
