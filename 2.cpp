@@ -22,15 +22,16 @@ intpair place_the_lightsource(vec2d(char)& shown_grid);
 //2.
 void put_the_walls(intpair light_source_pos,vec2d(cell) &grid, vec2d(char)& shown_grid, vec2d(int) &connected);
 //3.
-void place_the_draftsmen();
+void place_the_draftsmen(vec2d(char) & shown_grid);
 //4.
-void place_the_monsters();
+void place_the_monsters(vec2d(char) & shown_grid);
 
 // sub-algorithms:
 void create_the_spanning_tree(vec2d(cell) & grid, intpair light_source_pos,vec2d(int) & connected, vec2d(char) & shown_grid);
 int fix_the_wrong_walls(int i1, int j1, int direction);
 intpair where_is_the_neighbor(int i, int j, int direction);
 pair<intpair, intpair> shown2real_coord(int a, int b, char cell_type);
+bool are_there_no_enemy_nearby(vec2d(char) & shown_grid, int i, int j, char cell_type);
 
 int main(){
 
@@ -53,8 +54,24 @@ int main(){
     //1. place the light source
     intpair light_source_pos = place_the_lightsource(shown_grid);
     connected[light_source_pos.first][light_source_pos.second] = 1;
+    
     //2. place the walls
     put_the_walls(light_source_pos, grid, shown_grid, connected);
+    
+    //3. place the draftsmen
+    place_the_draftsmen(shown_grid);
+    
+    //4. place the monsters
+    place_the_monsters(shown_grid);
+
+    //final output
+    for(int i =0; i < shown_grid.size(); i++){
+        for(int j =0; j < shown_grid[0].size(); j++){
+            cout << shown_grid[i][j];
+        }
+        cout << endl;
+    }
+
     return 0;
 }
 
@@ -70,7 +87,18 @@ void put_the_walls(intpair light_source_pos,
     vec2d(cell) &grid, vec2d(char) &shown_grid,
     vec2d(int) &connected){
     
+    //place the outer walls
+    for (int j = 0; j <= 2 * m; j+=2){
+        shown_grid[0][j] = '#';
+        shown_grid[2*n][j] = '#';
+    }
+    for (int i = 2; i < 2 * n; i+=2){
+        shown_grid[i][0] = '#';
+        shown_grid[i][2*m] = '#';
+    }
+
     int walls_placed = 0;
+
     // first, create the spanning tree to ensure connectivity
     create_the_spanning_tree(grid, light_source_pos, connected, shown_grid);
     
@@ -104,8 +132,53 @@ void put_the_walls(intpair light_source_pos,
         shown_grid[wall_pos.first][wall_pos.second] = '#';
         walls_placed++;
     }
+
+    // finally, replace all remaining '.' with ' ' to finalize the maze
+    for (int i = 1; i < 2*n; i+=2){
+        for (int j = 2; j< 2*m; j+=2){
+            if(shown_grid[i][j] == '.'){
+                shown_grid[i][j] = ' ';
+            }
+        }
+    }
 }
 
+void place_the_draftsmen(vec2d(char) & shown_grid){
+    int darftsmen_placed = 0;
+    while(darftsmen_placed < drnum){
+        int i = rand() % n;
+        int j = rand() % m;
+        if(shown_grid[2*i +1][2*j +1] == ' '){
+            shown_grid[2*i +1][2*j +1] = 'D';
+            darftsmen_placed++;
+        }
+    }
+}
+
+void place_the_monsters(vec2d(char) & shown_grid){
+    if(mnnum < drnum){
+        int monsters_placed = 0;
+        while(monsters_placed < mnnum){
+            int i = rand() % n;
+            int j = rand() % m;
+            if(shown_grid[2*i +1][2*j +1] == ' '  && are_there_no_enemy_nearby(shown_grid, i, j, 'M')){
+                shown_grid[2*i +1][2*j +1] = 'M';
+                monsters_placed++;
+            }
+        }    
+    }
+    if(mnnum >= drnum){
+        int monsters_placed = 0;
+        while(monsters_placed < mnnum){
+            int i = rand() % n;
+            int j = rand() % m;
+            if(shown_grid[2*i +1][2*j +1] == ' '  && are_there_no_enemy_nearby(shown_grid, i, j, 'D')){
+                shown_grid[2*i +1][2*j +1] = 'M';
+                monsters_placed++;
+            }
+        }    
+    }
+}
 int  fix_the_wrong_walls(int i1, int j1, int direction){
     if (i1 == 0)
     {
@@ -208,7 +281,7 @@ void create_the_spanning_tree(vec2d(cell) &grid, intpair light_source_pos,
                 check_list.push_back(*neighbor);
                 connected[neighbor_pos.first][neighbor_pos.second]=1;
                 }
-            }
+        }
     }
 }
 
@@ -238,4 +311,31 @@ pair<intpair,intpair> shown2real_coord(int a, int b, char cell_type){
         break;
     }
     
+}
+
+bool are_there_no_enemy_nearby(vec2d(char) & shown_grid, int i, int j, char cell_type){
+    char enemy;
+    cell_type == 'D' ? enemy = 'M' : enemy = 'D';
+    int ni = i;
+    int nj = j;
+    if(i > 0){ // up
+        ni = i -1;
+        if(shown_grid[2*ni +1][2*nj +1] == enemy) return false;
+    }
+    ni = i;
+    if(i < n-1){ // down
+        ni = i +1;
+        if(shown_grid[2*ni +1][2*nj +1] == enemy) return false;
+    }
+    ni = i;
+    if(j > 0){ // left
+        nj = j -1;
+        if(shown_grid[2*ni +1][2*nj +1] == enemy) return false;
+    }
+    nj = j;
+    if(j < m-1){ // right
+        nj = j +1;
+        if(shown_grid[2*ni +1][2*nj +1] == enemy) return false;
+    }
+    return true;
 }
