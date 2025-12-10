@@ -21,10 +21,8 @@ First Phase, Printing the status:
 I used terminal for printing the status of the grid. (and it will soon be expanded for presenting the game)
 this is a bit different from the document presentation, Because it prints corners, walls and cells.
 Any sign has a meaning:
-'#' shows that it's a corner.
+'#' shows that it's either a corner or a wall.
 '.' shows an empty cell.
-'-' shows a horizenatl wall.
-'|' shows a vertical wall.
 'S' shows the light-source.
 'M' shows a monster.
 'D' shows a draftman.

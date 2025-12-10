@@ -17,7 +17,7 @@ int main(void){
     for (int i = 0; i <= n; i++)
     {
         for(int j=0; j<= m; j++){
-            grid[2*i+1][2*j+1] = '.';
+            grid[2*i+1][2*j+1] = ' ';
             grid[2 * i][2 * j] = '#';
             grid[2 * i][2 * j + 1] = ' ';
             grid[2 * i + 1][2 * j] = ' ';

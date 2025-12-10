@@ -12,7 +12,7 @@ struct Node
             parent = parent->parent;
         }
     }
-    void unitewith(Node* other)
+    bool unitewith(Node* other)
     {
         this->find();
         other->find();
@@ -21,7 +21,22 @@ struct Node
         if (root1 != root2)
         {
             root2->parent = root1;
+            return true; // united
+        }
+        else{
+            return false; // already united, no action taken
         }
     }
+    bool isConnected(Node* other)
+    {
+        this->find();
+        other->find();
+        return this->parent == other->parent;
+    }
+
+    //optional variables for additional features can be added here:
+    //1. For coordinates:
+    int x = 0;
+    int y = 0;
 };
 #endif // DSU_H
