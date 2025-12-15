@@ -3,6 +3,31 @@
 
 #include "includer.h"
 
+void clear_the_screen()
+{
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+
+#ifdef _WIN32 // Clear entire console buffer and reset cursor
+    (avoids system("cls")) HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut != INVALID_HANDLE_VALUE) {
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        if (GetConsoleScreenBufferInfo(hOut, &csbi)) {
+            DWORD count;
+            DWORD cellCount = csbi.dwSize.X * csbi.dwSize.Y;
+            COORD home = { 0, 0 };
+            FillConsoleOutputCharacterA(hOut, ' ', cellCount, home, &count);
+            FillConsoleOutputAttribute(hOut, csbi.wAttributes, cellCount, home, &count);
+            SetConsoleCursorPosition(hOut, home); } }
+#else // Clear full screen and move cursor home
+    cout << "\x1B[2J\x1B[H";
+#endif
+
+}
+
 void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
                   int given_drnum = -1, int given_mnnum = -1){
     
@@ -90,31 +115,47 @@ void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
     }
 
     cout << "Valid inputs!" << endl;
-    cout << string(50, '-') << endl;;
+    cout << string(50, '-') << endl;
+}
+
+void game_round(vector<intpair> players, vec2d(char)& shown_grid)
+{
+    // draftsmen movement:
+    for (int player = 0; player < drnum; player++)
+    {
+        cout << "Player " << player << ",(" << players[player].first << "," << players[player].second <<
+            "), enter the direction(W/S/A/D)" << ":\n";
+        char move;
+        int frwrd_x = players[player].first, frwrd_y = players[player].second;
+        cin >> move;
+        bool is_valid = true;
+        switch (move)
+        {
+        case 'W':
+        case 'w':
+            frwrd_x-=2;
+            if(shown_grid[frwrd_x][frwrd_y] == ' ')
+            {
+                shown_grid[frwrd_x+2][frwrd_y] = ' ';
+                shown_grid[frwrd_x][frwrd_y] = 'D';
+                players[player].first = frwrd_x;
+            }
+
+
+        }
+        while (move != 'W' && move != 'S' && move != 'A' && move != 'D')
+        {
+            cout << "please enter the correct direction(upper case):" << endl;
+        }
+        clear_the_screen();
+    }
+
+    // monsters movement:
+
 }
 
 void print_the_status(vec2d(char)& shown_grid){
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
-    
-    #ifdef _WIN32 // Clear entire console buffer and reset cursor 
-        (avoids system("cls")) HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); 
-        if (hOut != INVALID_HANDLE_VALUE) { 
-            CONSOLE_SCREEN_BUFFER_INFO csbi; 
-            if (GetConsoleScreenBufferInfo(hOut, &csbi)) { 
-                DWORD count; 
-                DWORD cellCount = csbi.dwSize.X * csbi.dwSize.Y;
-                COORD home = { 0, 0 }; 
-                FillConsoleOutputCharacterA(hOut, ' ', cellCount, home, &count);
-                FillConsoleOutputAttribute(hOut, csbi.wAttributes, cellCount, home, &count);
-                SetConsoleCursorPosition(hOut, home); } } 
-    #else // Clear full screen and move cursor home
-        cout << "\x1B[2J\x1B[H";
-    #endif
-
+    clear_the_screen();
     for(int i =0; i < shown_grid.size(); i++){
         for(int j =0; j < shown_grid[0].size(); j++){
             cout << shown_grid[i][j];
