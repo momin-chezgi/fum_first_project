@@ -15,17 +15,17 @@ struct Node
 
     void find(vec2d(cell)& grid)
     {
-        while(xp != x || yp != y){
+        int curx = x, cury = y;
+        while(xp != curx || yp != cury){
             Node parent = grid[xp][yp];
-            x = xp, y = yp;
+            curx = xp, cury = yp;
             xp = grid[xp][yp].xp, yp = grid[xp][yp].yp;
         }
     }
     bool unite(Node* n1, Node* n2, vec2d(cell)& grid)
     {
-        
         n1->find(grid), n2->find(grid);
-        
+
         if(n1->xp != n2->xp || n1->yp != n2->yp){
             n2->xp = n1->xp, n2->yp = n1->yp;
             return true; // united
