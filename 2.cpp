@@ -35,22 +35,36 @@ bool are_there_no_enemy_nearby(vec2d(char) & shown_grid, int i, int j, char cell
 
 int main(){
 
-    importer();
+    importer(true, 4, 5, 1, 1);     //bool wellcom = true, int given_n = -1, int given_m = -1, int given_drnum = -1, int given_mnnum = -1
 
     vec2d(cell) grid(n, vector<cell>(m));
     vec2d(int) connected(n, vector<int>(m, 0));
     vec2d(char) shown_grid(2 * n + 1, vector<char>(2 * m + 1));
 
     // initialize cells, corners and the space between cells that will be placed by walls later
-    for (int i = 0; i <= n; i++)
-    {
-        for(int j=0; j<= m; j++){
-            shown_grid[2*i+1][2*j+1] = ' ';
+    for (int i = 0; i < n; i++){
+        for(int j=0; j< m; j++){
+            shown_grid[2*i+1][2*j+1] = ' ';     
             shown_grid[2 * i][2 * j] = '#';
             shown_grid[2 * i][2 * j + 1] = ' ';
             shown_grid[2 * i + 1][2 * j] = ' ';
         }
     }
+    for(int i=0; i<=2*n; i++){
+        shown_grid[i][0] = shown_grid[i][2*m] = '#';
+    }
+    for(int j=0; j<=2*m; j++){
+        shown_grid[0][j] = shown_grid[2*n][j] = '#';
+    }
+    
+    //initialize the cells of grid[][]
+    for(int i=0; i<n; i++){
+        for(int j=0; j<m; j++){
+            grid[i][j].x = i;
+            grid[i][j].y = j;
+        }
+    }
+
     //1. place the light source
     intpair light_source_pos = place_the_lightsource(shown_grid);
     connected[light_source_pos.first][light_source_pos.second] = 1;
@@ -86,16 +100,6 @@ intpair place_the_lightsource(vec2d(char)& shown_grid){
 void put_the_walls(intpair light_source_pos, 
     vec2d(cell) &grid, vec2d(char) &shown_grid,
     vec2d(int) &connected){
-    
-    //place the outer walls
-    for (int j = 0; j <= 2 * m; j+=2){
-        shown_grid[0][j] = '#';
-        shown_grid[2*n][j] = '#';
-    }
-    for (int i = 2; i < 2 * n; i+=2){
-        shown_grid[i][0] = '#';
-        shown_grid[i][2*m] = '#';
-    }
 
     int walls_placed = 0;
 
@@ -248,15 +252,15 @@ void create_the_spanning_tree(vec2d(cell) &grid, intpair light_source_pos,
         int list_size = check_list.size();
         int idx = rand() % list_size;
         cell current = check_list[idx];
+
         // remove current from check_list
-        check_list[idx] = check_list.back();
-        check_list.pop_back();
+        check_list.erase(check_list.begin() + idx);
 
         // explore neighbors
         for(int direction = 0; direction < 4; direction++){
-            // if not connected, add to
-            if(where_is_the_neighbor(current.x, current.y, direction) != make_pair(-1, -1)){
-                intpair neighbor_pos = where_is_the_neighbor(current.x, current.y, direction);
+            intpair neighbor_pos = where_is_the_neighbor(current.x, current.y, direction);
+            // if not connected and is valid, add to
+            if(neighbor_pos != make_pair(-1, -1)){
                 cell* neighbor = &grid[neighbor_pos.first][neighbor_pos.second];
                 // if already connected, skip
                 if(connected[neighbor_pos.first][neighbor_pos.second]==1){
@@ -266,16 +270,16 @@ void create_the_spanning_tree(vec2d(cell) &grid, intpair light_source_pos,
                 // Update shown_grid to reflect the connection
                 switch (direction) {
                     case 0: // right
-                        shown_grid[2 * current.x + 1][2 * current.y + 2] = '. ';
+                        shown_grid[2 * current.x + 1][2 * current.y + 2] = '.';
                         break;
                     case 1: // up
-                        shown_grid[2 * current.x][2 * current.y + 1] = '. ';
+                        shown_grid[2 * current.x][2 * current.y + 1] = '.';
                         break;
                     case 2: // left
-                        shown_grid[2 * current.x + 1][2 * current.y] = ' .';
+                        shown_grid[2 * current.x + 1][2 * current.y] = '.';
                         break;
                     case 3: // down
-                        shown_grid[2 * current.x + 2][2 * current.y + 1] = ' .';
+                        shown_grid[2 * current.x + 2][2 * current.y + 1] = '.';
                         break;
                 }
                 check_list.push_back(*neighbor);
@@ -292,6 +296,7 @@ void create_the_spanning_tree(vec2d(cell) &grid, intpair light_source_pos,
 //  To get the corresponding cell coordinates in grid:
 //  case 1: vertical wall(a is odd): the wall is between [(a-1)/2][(b-2)/2] and [(a-1)/2][b/2]
 //  case 2: horizontal wall(b is odd): the wall is between [(a-2)/2][(b-1)/2] and [a/2][(b-1)/2]
+
 pair<intpair,intpair> shown2real_coord(int a, int b, char cell_type){
     switch (cell_type){
         case 'W': //wall
@@ -310,7 +315,7 @@ pair<intpair,intpair> shown2real_coord(int a, int b, char cell_type){
             }
         break;
     }
-    
+    return {{-1,-1},{-1,-1}};    
 }
 
 bool are_there_no_enemy_nearby(vec2d(char) & shown_grid, int i, int j, char cell_type){

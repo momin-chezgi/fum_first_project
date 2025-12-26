@@ -7,10 +7,12 @@ struct Node
     Node* parent = this;
     void find()
     {
-        while (parent != this)
+        Node* temp = parent;
+        while (temp->parent != temp)
         {
-            parent = parent->parent;
+            temp = temp->parent;    //segmention fault
         }
+        parent = temp;
     }
     bool unitewith(Node* other)
     {

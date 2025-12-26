@@ -5,27 +5,9 @@
 
 void clear_the_screen()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
-
-#ifdef _WIN32 // Clear entire console buffer and reset cursor
-    (avoids system("cls")) HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut != INVALID_HANDLE_VALUE) {
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-        if (GetConsoleScreenBufferInfo(hOut, &csbi)) {
-            DWORD count;
-            DWORD cellCount = csbi.dwSize.X * csbi.dwSize.Y;
-            COORD home = { 0, 0 };
-            FillConsoleOutputCharacterA(hOut, ' ', cellCount, home, &count);
-            FillConsoleOutputAttribute(hOut, csbi.wAttributes, cellCount, home, &count);
-            SetConsoleCursorPosition(hOut, home); } }
-#else // Clear full screen and move cursor home
-    cout << "\x1B[2J\x1B[H";
-#endif
-
+    for(int i=0; i<80; i++){
+        cout << endl;
+    }
 }
 
 void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
