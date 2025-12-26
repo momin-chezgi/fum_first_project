@@ -1,44 +1,45 @@
 #ifndef DSU_H
 #define DSU_H
-
+#include "includer.h"
 
 struct Node
 {
-    Node* parent = this;
-    void find()
+    // Node* parent = this;
+    // Node() : parent(this) {}
+    // Node(const Node&) = delete;
+    // Node& operator = (const Node&) = delete;
+    int x = 0;
+    int y = 0;
+    int xp = -1;
+    int yp = -1;
+
+    void find(vec2d(cell)& grid)
     {
-        Node* temp = parent;
-        while (temp->parent != temp)
-        {
-            temp = temp->parent;    //segmention fault
+        while(xp != x || yp != y){
+            Node parent = grid[xp][yp];
+            x = xp, y = yp;
+            xp = grid[xp][yp].xp, yp = grid[xp][yp].yp;
         }
-        parent = temp;
     }
-    bool unitewith(Node* other)
+    bool unite(Node* n1, Node* n2, vec2d(cell)& grid)
     {
-        this->find();
-        other->find();
-        Node* root1 = this->parent;
-        Node* root2 = other->parent;
-        if (root1 != root2)
-        {
-            root2->parent = root1;
+        
+        n1->find(grid), n2->find(grid);
+        
+        if(n1->xp != n2->xp || n1->yp != n2->yp){
+            n2->xp = n1->xp, n2->yp = n1->yp;
             return true; // united
         }
         else{
             return false; // already united, no action taken
         }
     }
-    bool isConnected(Node* other)
-    {
-        this->find();
-        other->find();
-        return this->parent == other->parent;
-    }
 
-    //optional variables for additional features can be added here:
-    //1. For coordinates:
-    int x = 0;
-    int y = 0;
+    // bool isConnected(Node* other)
+    // {
+    //     this->find();
+    //     other->find();
+    //     return this->parent == other->parent;
+    // }
 };
 #endif // DSU_H

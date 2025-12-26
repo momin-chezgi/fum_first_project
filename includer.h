@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 #include <random>
+#include <vector>
 #define cell Node
 #define vec2d(type) vector<vector<type>>
 #define intpair pair<int,int>

@@ -60,8 +60,8 @@ int main(){
     //initialize the cells of grid[][]
     for(int i=0; i<n; i++){
         for(int j=0; j<m; j++){
-            grid[i][j].x = i;
-            grid[i][j].y = j;
+            grid[i][j].x = grid[i][j].xp = i;
+            grid[i][j].y = grid[i][j].yp = j;
         }
     }
 
@@ -245,20 +245,20 @@ intpair where_is_the_neighbor(int i, int j, int direction){
 
 void create_the_spanning_tree(vec2d(cell) &grid, intpair light_source_pos,
     vec2d(int) &connected, vec2d(char) &shown_grid){
-    vector<cell> check_list;
-    check_list.push_back(grid[light_source_pos.first][light_source_pos.second]);
+    vector<cell*> check_list;
+    check_list.push_back(&grid[light_source_pos.first][light_source_pos.second]);
 
     while(!check_list.empty()){
         int list_size = check_list.size();
         int idx = rand() % list_size;
-        cell current = check_list[idx];
+        cell* current = check_list[idx];
 
         // remove current from check_list
         check_list.erase(check_list.begin() + idx);
 
         // explore neighbors
         for(int direction = 0; direction < 4; direction++){
-            intpair neighbor_pos = where_is_the_neighbor(current.x, current.y, direction);
+            intpair neighbor_pos = where_is_the_neighbor(current->x, current->y, direction);
             // if not connected and is valid, add to
             if(neighbor_pos != make_pair(-1, -1)){
                 cell* neighbor = &grid[neighbor_pos.first][neighbor_pos.second];
@@ -266,23 +266,23 @@ void create_the_spanning_tree(vec2d(cell) &grid, intpair light_source_pos,
                 if(connected[neighbor_pos.first][neighbor_pos.second]==1){
                     break;
                 }
-                current.unitewith(neighbor);
+                current->unite(current, neighbor, grid);
                 // Update shown_grid to reflect the connection
                 switch (direction) {
                     case 0: // right
-                        shown_grid[2 * current.x + 1][2 * current.y + 2] = '.';
+                        shown_grid[2 * current->x + 1][2 * current->y + 2] = '.';
                         break;
                     case 1: // up
-                        shown_grid[2 * current.x][2 * current.y + 1] = '.';
+                        shown_grid[2 * current->x][2 * current->y + 1] = '.';
                         break;
                     case 2: // left
-                        shown_grid[2 * current.x + 1][2 * current.y] = '.';
+                        shown_grid[2 * current->x + 1][2 * current->y] = '.';
                         break;
                     case 3: // down
-                        shown_grid[2 * current.x + 2][2 * current.y + 1] = '.';
+                        shown_grid[2 * current->x + 2][2 * current->y + 1] = '.';
                         break;
                 }
-                check_list.push_back(*neighbor);
+                check_list.push_back(neighbor);
                 connected[neighbor_pos.first][neighbor_pos.second]=1;
                 }
         }
