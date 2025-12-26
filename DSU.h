@@ -10,28 +10,33 @@ struct Node
     // Node& operator = (const Node&) = delete;
     int x = 0;
     int y = 0;
-    int xp = -1;
-    int yp = -1;
+    int xp = 0;
+    int yp = 0;
 
-    void find(vec2d(cell)& grid)
-    {
-        int curx = x, cury = y;
-        while(xp != curx || yp != cury){
-            Node parent = grid[xp][yp];
-            curx = xp, cury = yp;
-            xp = grid[xp][yp].xp, yp = grid[xp][yp].yp;
+    void find(vec2d(cell)& grid) {
+        if (xp == x && yp == y) return;  // Already root
+        int rootx = x, rooty = y;
+        while (xp != rootx || yp != rooty) {
+            rootx = xp;
+            rooty = yp;
+            xp = grid[xp][yp].xp;
+            yp = grid[xp][yp].yp;
         }
+        // Now compress path: set this node's parent directly to root
+        this->xp = rootx;
+        this->yp = rooty;
     }
-    bool unite(Node* n1, Node* n2, vec2d(cell)& grid)
-    {
-        n1->find(grid), n2->find(grid);
-
-        if(n1->xp != n2->xp || n1->yp != n2->yp){
-            n2->xp = n1->xp, n2->yp = n1->yp;
-            return true; // united
-        }
-        else{
-            return false; // already united, no action taken
+    bool unite(Node* n1, Node* n2, vec2d(cell)& grid) {
+        n1->find(grid);
+        n2->find(grid);
+        int root2_x = n2->xp;
+        int root2_y = n2->yp;
+        if (n1->xp != root2_x || n1->yp != root2_y) {
+            grid[root2_x][root2_y].xp = n1->xp;
+            grid[root2_x][root2_y].yp = n1->yp;
+            return true;
+        } else {
+            return false;
         }
     }
 

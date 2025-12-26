@@ -32,10 +32,11 @@ int fix_the_wrong_walls(int i1, int j1, int direction);
 intpair where_is_the_neighbor(int i, int j, int direction);
 pair<intpair, intpair> shown2real_coord(int a, int b, char cell_type);
 bool are_there_no_enemy_nearby(vec2d(char) & shown_grid, int i, int j, char cell_type);
+inline void remove_dots(vec2d(char)& shown_grid);
 
 int main(){
 
-    importer(true, 4, 5, 1, 1);     //bool wellcom = true, int given_n = -1, int given_m = -1, int given_drnum = -1, int given_mnnum = -1
+    importer();
 
     vec2d(cell) grid(n, vector<cell>(m));
     vec2d(int) connected(n, vector<int>(m, 0));
@@ -78,8 +79,10 @@ int main(){
     //4. place the monsters
     place_the_monsters(shown_grid);
 
+    remove_dots(shown_grid);
+
     //final output
-    for(int i =0; i < shown_grid.size(); i++){
+    for(int i = 0; i < shown_grid.size(); i++){
         for(int j =0; j < shown_grid[0].size(); j++){
             cout << shown_grid[i][j];
         }
@@ -257,7 +260,7 @@ intpair where_is_the_neighbor(int i, int j, int direction){
 void create_the_spanning_tree(vec2d(cell) &grid, intpair light_source_pos,
     vec2d(int) &connected, vec2d(char) &shown_grid){
     vector<cell*> check_list;
-     check_list.push_back(&grid[light_source_pos.first][light_source_pos.second]);
+    check_list.push_back(&grid[light_source_pos.first][light_source_pos.second]);
 
     while(!check_list.empty()){
         int list_size = check_list.size();
@@ -276,7 +279,7 @@ void create_the_spanning_tree(vec2d(cell) &grid, intpair light_source_pos,
                 cell* neighbor = &grid[neighbor_pos.first][neighbor_pos.second];
                 // if already connected, skip
                 if(connected[neighbor_pos.first][neighbor_pos.second]==1){
-                    break;
+                    continue;
                 }
                 //add the neighbor to the tree and Update shown_grid to reflect the connection
                 if(current->unite(current, neighbor, grid)) shown_grid[current->x + neighbor->x + 1][current->y + neighbor->y + 1] = '.';
@@ -303,7 +306,14 @@ void create_the_spanning_tree(vec2d(cell) &grid, intpair light_source_pos,
     }
 }
 
-
+inline void remove_dots(vec2d(char)& shown_grid){
+    for(int i=1; i<2*n; i++){
+        for(int j=1; j<2*m; j++){
+            if(i%2==j%2) continue;
+            if(shown_grid[i][j] == '.') shown_grid[i][j] = ' ';
+        }
+    }
+}
 
 //How to convert between shown_grid and grid?
 //  if we have shown_grid[a][b], iff a%2 != b%2 then this is a wall-place coordinate and [(a != 0||n-1) || (b != 0||m-1)]
