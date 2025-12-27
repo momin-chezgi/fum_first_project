@@ -100,7 +100,6 @@ intpair place_the_lightsource(vec2d(char)& shown_grid){
     return {i, j};
 }
 
-//Check it !
 void put_the_walls(intpair light_source_pos, 
     vec2d(cell) &grid, vec2d(char) &shown_grid,
     vec2d(int) &connected){
@@ -274,31 +273,18 @@ void create_the_spanning_tree(vec2d(cell) &grid, intpair light_source_pos,
         // explore neighbors
         for(int direction = 0; direction < 4; direction++){
             intpair neighbor_pos = where_is_the_neighbor(current->x, current->y, direction);
+            
             // if not connected and is valid, add to the tree
             if(neighbor_pos != make_pair(-1, -1)){
                 cell* neighbor = &grid[neighbor_pos.first][neighbor_pos.second];
+                
                 // if already connected, skip
                 if(connected[neighbor_pos.first][neighbor_pos.second]==1){
                     continue;
                 }
+
                 //add the neighbor to the tree and Update shown_grid to reflect the connection
                 if(current->unite(current, neighbor, grid)) shown_grid[current->x + neighbor->x + 1][current->y + neighbor->y + 1] = '.';
-                
-                // Update shown_grid to reflect the connection
-                // switch (direction) {
-                //     case 0: // right
-                //         shown_grid[2 * current->x + 1][2 * current->y + 2] = '.';
-                //         break;
-                //     case 1: // up
-                //         shown_grid[2 * current->x][2 * current->y + 1] = '.';
-                //         break;
-                //     case 2: // left
-                //         shown_grid[2 * current->x + 1][2 * current->y] = '.';
-                //         break;
-                //     case 3: // down
-                //         shown_grid[2 * current->x + 2][2 * current->y + 1] = '.';
-                //         break;
-                // }
                 check_list.push_back(neighbor);
                 connected[neighbor_pos.first][neighbor_pos.second]=1;
                 }
