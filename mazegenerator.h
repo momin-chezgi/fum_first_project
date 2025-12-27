@@ -303,7 +303,7 @@ inline void remove_dots(vec2d(char)& shown_grid){
     for(int i=1; i<2*n; i++){
         for(int j=1; j<2*m; j++){
             if(i%2==j%2) continue;
-            if(shown_grid[i][j] != '.')shown_grid[i][j] = ' ';
+            if(shown_grid[i][j] == '.')shown_grid[i][j] = ' ';
         }
     }
 }

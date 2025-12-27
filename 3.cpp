@@ -99,39 +99,36 @@ int main(){
             }
         }
 
-        
-        
-
         if(!wants_to_rest){
             // update the draftsman's position
             shown_grid[draftsman_pos.first][draftsman_pos.second] = ' ';
-            draftsman_pos = {new_x, new_y};
-            shown_grid[draftsman_pos.first][draftsman_pos.second] = 'D';
+            shown_grid[new_x][new_y] = 'D';
         }
 
         // monster movement     
         for (int l=0; l<2; l++){
+            // if monster reaches the draftsman
+            if(monster_new_x == new_x && monster_new_y == new_y){
+                ended = true;
+                break;
+            }
             //If it can close horizantelly...
-            if(draftsman_pos.second < monster_pos.second && shown_grid[monster_pos.first][monster_pos.second - 1] != '#' && monster_new_y-2>0){
+            if(draftsman_pos.second < monster_new_y && shown_grid[monster_new_x][monster_new_y - 1] != '#' && monster_new_y>2){
                 monster_new_y -= 2;
                 continue;
             }
-            if(draftsman_pos.second > monster_pos.second && shown_grid[monster_pos.first][monster_pos.second + 1] != '#' && monster_new_y+2>0){
+            if(draftsman_pos.second > monster_new_y && shown_grid[monster_new_x][monster_new_y + 1] != '#' && monster_new_y<(2*m-2)){
                 monster_new_y += 2;
                 continue;
             }
             //else closes vertically...
-            if(draftsman_pos.first < monster_pos.first && shown_grid[monster_pos.first - 1][monster_pos.second] != '#' && monster_new_x-2>0){
+            if(draftsman_pos.first < monster_new_x && shown_grid[monster_new_x - 1][monster_new_y] != '#' && monster_new_x>2){
                 monster_new_x -= 2;
                 continue;
             }
-            if(draftsman_pos.first > monster_pos.first && shown_grid[monster_pos.first + 1][monster_pos.second] != '#' && monster_new_x+2>0){
+            if(draftsman_pos.first > monster_pos.first && shown_grid[monster_new_x + 1][monster_new_y] != '#' && monster_new_x<(2*n-2)){
                 monster_new_x += 2;
                 continue;
-            }
-            // if monster reaches the draftsman
-            if(monster_pos == draftsman_pos){
-                ended = true;
             }
         }
 
@@ -141,6 +138,8 @@ int main(){
         shown_grid[monster_pos.first][monster_pos.second] = 'M';
         print_the_status(shown_grid);
         
+        draftsman_pos = {new_x, new_y};
+
         if(monster_pos == draftsman_pos){
             ended = true;
         }
