@@ -100,6 +100,7 @@ void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
     cout << string(50, '-') << endl;
 }
 
+
 void game_round(vector<intpair> players, vec2d(char)& shown_grid)
 {
     // draftsmen movement:
