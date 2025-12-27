@@ -36,11 +36,11 @@ int main(){
     int new_y = draftsman_pos.second;
     int monster_new_x = monster_pos.first;
     int monster_new_y = monster_pos.second;
+
     while(!ended){
-        new_x = draftsman_pos.first;
-        new_y = draftsman_pos.second;
         char move;
-        while(new_x == draftsman_pos.first && new_y == draftsman_pos.second){
+        bool wants_to_rest = false;
+        while(new_x == draftsman_pos.first && new_y == draftsman_pos.second && !wants_to_rest){
             cout << "Enter your move (W/A/S/D) Or Z for nothing: ";
             cin >> move;
             switch(move){
@@ -62,6 +62,7 @@ int main(){
                     break;
                 case 'Z':
                 case 'z':
+                    wants_to_rest = true;
                     break;
                 default:
                     cout << "Invalid move! Please enter W, A, S, or D." << endl;
@@ -98,41 +99,51 @@ int main(){
             }
         }
 
-        // update the draftsman's position
-        shown_grid[draftsman_pos.first][draftsman_pos.second] = ' ';
-        draftsman_pos = {new_x, new_y};
-        shown_grid[draftsman_pos.first][draftsman_pos.second] = 'D';
-
-        // move the monster
-        monster_new_x = monster_pos.first;
-        monster_new_y = monster_pos.second;
         
+        
+
+        if(!wants_to_rest){
+            // update the draftsman's position
+            shown_grid[draftsman_pos.first][draftsman_pos.second] = ' ';
+            draftsman_pos = {new_x, new_y};
+            shown_grid[draftsman_pos.first][draftsman_pos.second] = 'D';
+        }
+
+        // monster movement     
         for (int l=0; l<2; l++){
-            // simple logic for monster movement: move towards the draftsman if possible
-            int hdir = (draftsman_pos.second - monster_pos.second)/(int)abs(draftsman_pos.second - monster_pos.second);
-            int vdir = (draftsman_pos.first - monster_pos.first)/(int)abs(draftsman_pos.first - monster_pos.first);
-            
-            if(shown_grid[monster_pos.first][monster_pos.second + hdir] != '#'){
-                monster_new_y += 2*hdir;
-                monster_new_y > 0 && monster_new_y < 2*n && shown_grid[monster_pos.first][monster_new_y] != 'S' ? draftsman_pos.second = monster_new_y : monster_new_y -= 2*hdir;
+            //If it can close horizantelly...
+            if(draftsman_pos.second < monster_pos.second && shown_grid[monster_pos.first][monster_pos.second - 1] != '#' && monster_new_y-2>0){
+                monster_new_y -= 2;
+                continue;
             }
-            else if(shown_grid[monster_pos.first + vdir][monster_pos.second] != '#'){
-                monster_new_x += 2*vdir;
-                monster_new_x > 0 && monster_new_x < 2*n && shown_grid[monster_new_x][monster_pos.second] != 'S' ? draftsman_pos.first = monster_new_x : monster_new_x -= 2*vdir;
+            if(draftsman_pos.second > monster_pos.second && shown_grid[monster_pos.first][monster_pos.second + 1] != '#' && monster_new_y+2>0){
+                monster_new_y += 2;
+                continue;
+            }
+            //else closes vertically...
+            if(draftsman_pos.first < monster_pos.first && shown_grid[monster_pos.first - 1][monster_pos.second] != '#' && monster_new_x-2>0){
+                monster_new_x -= 2;
+                continue;
+            }
+            if(draftsman_pos.first > monster_pos.first && shown_grid[monster_pos.first + 1][monster_pos.second] != '#' && monster_new_x+2>0){
+                monster_new_x += 2;
+                continue;
+            }
+            // if monster reaches the draftsman
+            if(monster_pos == draftsman_pos){
+                ended = true;
             }
         }
 
         // update the monster's position
-        shown_grid[monster_pos.first][monster_pos.second] = ' ';
+        monster_pos == light_source_pos ? shown_grid[monster_pos.first][monster_pos.second] = 'S' : shown_grid[monster_pos.first][monster_pos.second] = ' ';
         monster_pos = {monster_new_x, monster_new_y};
         shown_grid[monster_pos.first][monster_pos.second] = 'M';
+        print_the_status(shown_grid);
         
-        // if monster reaches the draftsman
         if(monster_pos == draftsman_pos){
             ended = true;
         }
-        // print the updated maze
-        print_the_status(shown_grid);
         // check for win/lose conditions here and set ended = true if game ends
     }
     win ? cout << "Congrats! You could walk through this wild world! I recommand you to play the next release of this game.\n" : cout << "Ops! Sadly, it seems you get stuck in the maze!\n";
