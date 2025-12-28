@@ -7,13 +7,18 @@ int drnum, mnnum, wlnum;
 intpair light_source_pos;
 vector<intpair> mnpos, drpos;
 
+
 intpair drmove(vec2d(char)& grid, intpair drpos);
-intpair mnmove(vec2d(char)& grid, intpair drpos);
+intpair mnmove(vec2d(char)& grid, intpair mnpos);
+intpair Im_hungry(vec2d(char)& grid, intpair mnpos);
+
 
 int main(){
 
-    importer(false, -1, -1, 1, 1);
+    importer();
+
     vec2d(char) grid(2 * n + 1, vector<char>(2 * m + 1));
+
     mazegenerator(grid);
 
     for(int i = 0; i < n; i++){
@@ -34,22 +39,23 @@ int main(){
         }
     }
 
-    bool win = false;
-    bool ended = false;
-
     bool ended[drnum] = { };
     int remain_dr = drnum;
-    
-    while(remain_dr>0){
-        
-        vector<int> declare;
+    vector<int> winners;
+    vector<int> losers;
+
+
+    //while there's a draftsman, still working
+    while(remain_dr > 0){
+
         // Draftsmen move one by one
         for(int d=0; d<drnum; d++){
             if(ended[d]) continue;
+
             drpos[d] = drmove(grid, drpos[d]);
             if(drpos[d] == light_source_pos){
                 ended[d] = true;
-                declare.push_back(d);
+                winners.push_back(d);
                 remain_dr--;
             }
         }
@@ -59,117 +65,98 @@ int main(){
             mnpos[p] = mnmove(grid, mnpos[p]);
         }
 
-        print_the_status(grid);
+        //Check if a/some draftsman/men is/are eaten...
+        for(int d=0; d<remain_dr; d++){
+            if(ended[d]) continue;
+            if(grid[drpos[d].first][drpos[d].second] == 'M'){
+                ended[d] = true;
+                losers.push_back(d);
+                remain_dr--;
+            }
+        }
 
-        for(auto s:declare) cout << "congrats player #" << s << "! You got out of this hell!\n";
+        //status...
+        print_the_status(grid);
+        for(auto s:winners) cout << "congrats player #" << s << "! You got out of this hell!\n";
+        for(auto s:losers) cout << "Ops! player #" << s << "! God bless you!\n";
     }
+
+
+    // Announce the final results...
+    cout << 50*'-' << endl;
+    cout << "Ranking:" << endl;
+    int w=0;
+    for(; w<winners.size(); w++){
+        cout << w+1 << ".player #" << winners[w] << endl;
+    }
+    for(int l=losers.size()-1; l>=0; l--){
+        cout << w++ << ".player #" << losers[l] << endl;
+    }
+
 
     return 0;
 }
 
-intpair drmove(vec2d(char)& grid,intpair drpos){       //returns the new coordinate
-    char move;
-    bool wants_to_rest = false;
-    int new_x = drpos.first;
-    int new_y = drpos.second;
-    while(new_x == drpos.first && new_y == drpos.second && !wants_to_rest){
-        cout << "Enter your move (W/A/S/D) Or Z for nothing: ";
-        cin >> move;
-        switch(move){
-            case 'W':
-            case 'w':
-                new_x -= 2;
-                break;
-            case 'A':
-            case 'a':
-                new_y -= 2;
-                break;
-            case 'S':
-            case 's':
-                new_x += 2;
-                break;
-            case 'D':
-            case 'd':
-                new_y += 2;
-                break;
-            case 'Z':
-            case 'z':
-                wants_to_rest = true;
-                break;
-            default:
-                cout << "Invalid move! Please enter W, A, S, or D." << endl;
-                new_x = drpos.first;
-                new_y = drpos.second;
-                continue;
-            }
-
-            //check if the player wants to go out of bounds
-            if(new_x < 1 || new_x >= 2*n || new_y < 1 || new_y >= 2*m){
-                cout << "Move out of bounds! Try again." << endl;
-                new_x = drpos.first;
-                new_y = drpos.second;
-                continue;
-            }
-            
-            // check if the move is blocked by a wall
-            if(grid[(drpos.first + new_x)/2][(drpos.second + new_y)/2] == '#'){
-                cout << "Move blocked by a wall! Try again." << endl;
-                new_x = drpos.first;
-                new_y = drpos.second;
-            }
-
-            // check if there aren't any monsters in the new position
-            else if(grid[new_x][new_y] == 'M'){
-                cout << "Do you wanna be the snack of a monster? Try again." << endl;
-                new_x = drpos.first;
-                new_y = drpos.second;
-            }
+intpair drmove(vec2d(char)& grid, const intpair drpos, const int id){       //returns the new coordinate
+    intpair dr2pos = get_the_move(grid,drpos.first, drpos.second, id);
+    if(dr2pos == drpos){
+        //Mark the reserved cell
+        grid[dr2pos.first][dr2pos.second] = '.';
     }
-    if(!wants_to_rest){
-        // update the draftsman's position
-        grid[drpos.first][drpos.second] = ' ';
-        grid[new_x][new_y] = 'D';
-    }
-
+    return dr2pos;
 }
 
 
-intpair mnmove(vec2d(char)& grid, intpair drpos){
+intpair mnmove(vec2d(char)& grid,const intpair mnpos){
+    int mnx = mnpos.first;
+    int mny = mnpos.second;
+    intpair drpos = Im_hungry(grid, mnpos);
     for (int l=0; l<2; l++){
-            // if monster reaches the draftsman
-            if(mnx == new_x && mny == new_y){
-                ended = true;
-                break;
-            }
-            //If it can close horizantelly...
-            if(drpos.second < mny && grid[mnx][mny - 1] != '#' && mny>2){
-                mny -= 2;
-                continue;
-            }
-            if(drpos.second > mny && grid[mnx][mny + 1] != '#' && mny<(2*m-2)){
-                mny += 2;
-                continue;
-            }
-            //else closes vertically...
-            if(drpos.first < mnx && grid[mnx - 1][mny] != '#' && mnx>2){
-                mnx -= 2;
-                continue;
-            }
-            if(drpos.first > mnpos.first && grid[mnx + 1][mny] != '#' && mnx<(2*n-2)){
-                mnx += 2;
-                continue;
-            }
+        //If it can close horizantelly...
+        if(drpos.second < mny && grid[mnx][mny - 1] != '#' && mny>2 && grid[mnx][mny-2] == ' '){
+            mny -= 2;
+            continue;
         }
-
-        // update the monster's position
-        mnpos == light_source_pos ? grid[mnpos.first][mnpos.second] = 'S' : grid[mnpos.first][mnpos.second] = ' ';
-        mnpos = {mnx, mny};
-        grid[mnpos.first][mnpos.second] = 'M';
-        print_the_status(grid);
-        
-        drpos = {new_x, new_y};
-
-        if(mnpos == drpos){
-            ended = true;
+        if(drpos.second > mny && grid[mnx][mny + 1] != '#' && mny<(2*m-2) && grid[mnx][mny+2] == ' '){
+            mny += 2;
+            continue;
         }
+        //else closes vertically...
+        if(drpos.first < mnx && grid[mnx - 1][mny] != '#' && mnx>2 && grid[mnx-2][mny] == ' '){
+            mnx -= 2;
+            continue;
+        }
+        if(drpos.first > mnpos.first && grid[mnx + 1][mny] != '#' && mnx<(2*n-2) && grid[mnx+2][mny] == ' '){
+            mnx += 2;
+            continue;
+        }
+    }
+
+    // update the monster's position
+    grid[mnpos.first][mnpos.second] = ' ';
+    grid[mnx][mny] = 'M';
+
+    return {mnx,mny};
+}
+
+
+intpair Im_hungry(vec2d(char)& grid, intpair mnpos){
+    vector<intpair> breadth1, breadth2;
+    breadth1.push_back(mnpos);
+    while(!breadth1.empty()){
+        for(auto neigh : breadth1){
+            if(grid[neigh.first][neigh.second] == 'D'){
+                return neigh;
+            }
+            int x = neigh.first;
+            int y = neigh.second;
+            if(grid[x+1][y]!='#') breadth2.push_back({x+1,y});
+            if(grid[x][y+1]!='#') breadth2.push_back({x,y+1});
+            if(grid[x-1][y]!='#') breadth2.push_back({x-1,y});
+            if(grid[x][y-1]!='#') breadth2.push_back({x,y-1});
+        }
+        breadth1 = breadth2;
+        breadth2.clear();
+    }
+    return {-1,-1};
 }

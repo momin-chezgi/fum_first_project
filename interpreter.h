@@ -100,6 +100,68 @@ void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
     cout << string(50, '-') << endl;
 }
 
+intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id){ //returns the coordinate of moved draftsman
+    bool wants_to_rest = false;
+    char move;
+    int new_x = x;
+    int new_y = y;
+    cout << "Player #" << id << ":"<< endl;
+    while(new_x == x && new_y == y && !wants_to_rest){
+        cout << "Enter your move (W/A/S/D) Or Z for nothing: ";
+        cin >> move;
+        switch(move){
+            case 'W':
+            case 'w':
+                new_x -= 2;
+                break;
+            case 'A':
+            case 'a':
+                new_y -= 2;
+                break;
+            case 'S':
+            case 's':
+                new_x += 2;
+                break;
+            case 'D':
+            case 'd':
+                new_y += 2;
+                break;
+            case 'Z':
+            case 'z':
+                wants_to_rest = true;
+                break;
+            default:
+                cout << "Invalid move! Please enter W, A, S, or D." << endl;
+                new_x = x;
+                new_y = y;
+                continue;
+        }
+
+        //check if the player wants to go out of bounds
+        if(new_x < 1 || new_x >= 2*n || new_y < 1 || new_y >= 2*m){
+            cout << "Move out of bounds! Try again." << endl;
+            new_x = x;
+            new_y = y;
+            continue;
+        }
+        
+        // check if the move is blocked by a wall
+        if(grid[(x + new_x)/2][(y + new_y)/2] == '#'){
+            cout << "Move blocked by a wall! Try again." << endl;
+            new_x = x;
+            new_y = y;
+            continue;
+        }
+
+        // check if there aren't any monsters in the new position
+        if(grid[new_x][new_y] == 'M'){
+            cout << "Do you wanna be the snack of a monster? Try again." << endl;
+            new_x = x;
+            new_y = y;
+        }
+    }
+    return {new_x, new_y};
+}
 
 void game_round(vector<intpair> players, vec2d(char)& shown_grid)
 {
