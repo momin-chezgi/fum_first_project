@@ -1,5 +1,5 @@
 +Authors:
-Muhsen Afgahi Zadeh      mohsenfqz
+Mohsen Afgahi Zadeh      mohsenfqz
 Mohammad Amin Chezgi     momin-chezgi
 
 For translation, we prefered to use below words:
