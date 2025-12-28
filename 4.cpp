@@ -39,7 +39,8 @@ int main(){
         }
     }
 
-    bool ended[drnum] = { };
+    bool ended[drnum];
+    for (int i=0; i<drnum; i++) ended[i] = false;
     int remain_dr = drnum;
     vector<int> winners;
     vector<int> losers;
