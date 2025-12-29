@@ -88,14 +88,6 @@ int mazegenerator(vec2d(char)& shown_grid, int n_input  = n, int m_input = m,
 
     remove_dots(shown_grid);
 
-    //final output
-    for(int i = 0; i < shown_grid.size(); i++){
-        for(int j =0; j < shown_grid[0].size(); j++){
-            cout << shown_grid[i][j];
-        }
-        cout << endl;
-    }
-
     return 0;
 }
 

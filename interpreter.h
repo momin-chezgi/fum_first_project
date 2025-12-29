@@ -12,7 +12,7 @@ void clear_the_screen()
 
 void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
                   int given_drnum = -1, int given_mnnum = -1){
-    
+    clear_the_screen();
     if(wellcom){
     cout << "Wellcome to 'The Tale of Labyrinth' game! " << endl;
     cout << "remember that rules(n and m are dimensions):" << endl;
@@ -105,7 +105,7 @@ intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id){ /
     char move;
     int new_x = x;
     int new_y = y;
-    cout << "Player #" << id << ":"<< endl;
+    cout << "Player #" << id+1 << "(" << (x+1)/2 << ", " << (y+1)/2 << "):"<< endl;
     while(new_x == x && new_y == y && !wants_to_rest){
         cout << "Enter your move (W/A/S/D) Or Z for nothing: ";
         cin >> move;
@@ -153,56 +153,43 @@ intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id){ /
             continue;
         }
 
-        // check if there aren't any monsters in the new position
+        // check if there aren't any monsters or draftsman in the new position
         if(grid[new_x][new_y] == 'M'){
             cout << "Do you wanna be the snack of a monster? Try again." << endl;
             new_x = x;
             new_y = y;
         }
+        else {
+            if(grid[new_x][new_y] == 'D'){
+                cout << "Sorry! every room hasn't got the place for you both. Try again." << endl;
+                new_x = x;
+                new_y = y;
+            }
+            else if(grid[new_x][new_y] == 'Z'){
+                cout << "He's asleep! Don't make him wake up. Try again." << endl;
+                new_x = x;
+                new_y = y;
+            }
+        }
     }
     return {new_x, new_y};
 }
 
-void game_round(vector<intpair> players, vec2d(char)& shown_grid)
-{
-    // draftsmen movement:
-    for (int player = 0; player < drnum; player++)
-    {
-        cout << "Player " << player << ",(" << players[player].first << "," << players[player].second <<
-            "), enter the direction(W/S/A/D)" << ":\n";
-        char move;
-        int frwrd_x = players[player].first, frwrd_y = players[player].second;
-        cin >> move;
-        bool is_valid = true;
-        switch (move)
-        {
-        case 'W':
-        case 'w':
-            frwrd_x-=2;
-            if(shown_grid[frwrd_x][frwrd_y] == ' ')
-            {
-                shown_grid[frwrd_x+2][frwrd_y] = ' ';
-                shown_grid[frwrd_x][frwrd_y] = 'D';
-                players[player].first = frwrd_x;
-            }
-
-
-        }
-        while (move != 'W' && move != 'S' && move != 'A' && move != 'D')
-        {
-            cout << "please enter the correct direction(upper case):" << endl;
-        }
-        clear_the_screen();
-    }
-
-    // monsters movement:
-
-}
 
 void print_the_status(vec2d(char)& shown_grid){
     clear_the_screen();
-    for(int i =0; i < shown_grid.size(); i++){
-        for(int j =0; j < shown_grid[0].size(); j++){
+    cout << "   ";
+    for(int j=1; j<=m; j++){
+        if(j>9)cout << (j-j%10)/10 << " ";
+        else cout << "  ";
+    }
+    cout << endl << "   ";
+    for(int j=1; j<=m; j++) cout << j%10 << ' ';
+    cout << endl;
+    for(int i = 0; i <= 2*n; i++){
+        if(i%2==1) (i+1)/2 > 9 ? cout << (i+1)/2 : cout << (i+1)/2 << " ";
+        else cout << "  ";
+        for( int j =0; j <= 2*m; j++){
             cout << shown_grid[i][j];
         }
         cout << endl;
