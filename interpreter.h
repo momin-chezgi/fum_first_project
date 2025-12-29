@@ -3,7 +3,7 @@
 
 #include "includer.h"
 
-void clear_the_screen()
+inline void clear_the_screen()
 {
     for(int i=0; i<80; i++){
         cout << endl;
@@ -100,12 +100,17 @@ void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
     cout << string(50, '-') << endl;
 }
 
-intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id){ //returns the coordinate of moved draftsman
+intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id, vector<int>& deservedid, const int round=0){ //returns the coordinate of moved draftsman
     bool wants_to_rest = false;
     char move;
     int new_x = x;
     int new_y = y;
-    cout << "Player #" << id+1 << "(" << (x+1)/2 << ", " << (y+1)/2 << "):"<< endl;
+    if(!deservedid.empty()){
+        for(auto d:deservedid)    
+        d>0? cout << "congrats player #" << d << "! You got out of this hell!\n" : cout << "Ops! player #" << -d << "! God bless you!\n";
+    }
+    if(round!=0) cout << "Round " << round <<":==========================\n";
+    cout << "Player #" << id+1 << " (" << (x+1)/2 << ", " << (y+1)/2 << "):"<< endl;
     while(new_x == x && new_y == y && !wants_to_rest){
         cout << "Enter your move (W/A/S/D) Or Z for nothing: ";
         cin >> move;
@@ -160,7 +165,7 @@ intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id){ /
             new_y = y;
         }
         else {
-            if(grid[new_x][new_y] == 'D'){
+            if(grid[new_x][new_y] == 'D' || grid[new_x][new_y] == 'd'){
                 cout << "Sorry! every room hasn't got the place for you both. Try again." << endl;
                 new_x = x;
                 new_y = y;
@@ -178,6 +183,7 @@ intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id){ /
 
 void print_the_status(vec2d(char)& shown_grid){
     clear_the_screen();
+    //print the index of rows and columns
     cout << "   ";
     for(int j=1; j<=m; j++){
         if(j>9)cout << (j-j%10)/10 << " ";

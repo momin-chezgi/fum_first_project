@@ -8,10 +8,11 @@ intpair light_source_pos;
 vector<intpair> mnpos, drpos;
 
 
-intpair drmove(vec2d(char)& grid, intpair drpos, const int id);
+intpair drmove(vec2d(char)& grid, intpair drpos, const int id, vector<int> deservedid, const int round);
 intpair mnmove(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 intpair Im_hungry(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 
+//issues: Ranking, printing round, dead draftsmen and winners.
 
 int main(){
 
@@ -21,6 +22,7 @@ int main(){
 
     mazegenerator(grid);
 
+    // Make vectors of coordinates of any type
     for(int i = 0; i < n; i++){
         for (int j = 0; j < m; j++){
             int x = 2 * i + 1;
@@ -44,24 +46,27 @@ int main(){
     int remain_dr = drnum;
     vector<int> winners;
     vector<int> losers;
-
+    int round = 1;
+    vector<int> deservedid;
 
     //while there's a draftsman, still working
     while(remain_dr > 0){
-        vector<int> round_winners;
-        vector<int> round_losers;
 
         // Draftsmen move one by one
         for(int d=0; d<drnum; d++){
             if(ended[d]) continue;
-
-            drpos[d] = drmove(grid, drpos[d], d);
+            
+            d==0 ? drpos[d] = drmove(grid, drpos[d], d, deservedid,round)
+                 : drpos[d] = drmove(grid, drpos[d], d, deservedid,0);
+            
+            deservedid.clear();
 
             //When the draftsman reaches the light source, he wins...
             if(drpos[d] == light_source_pos){
                 grid[drpos[d].first][drpos[d].second] = 'S';
                 ended[d] = true;
-                round_winners.push_back(d);
+                winners.push_back(d);
+                deservedid.push_back(d+1);
                 remain_dr--;
             }
         }
@@ -77,23 +82,14 @@ int main(){
             if(ended[d]) continue;
             if(grid[drpos[d].first][drpos[d].second] == 'M'){
                 ended[d] = true;
-                round_losers.push_back(d);
+                losers.push_back(d);
+                deservedid.push_back(-1-d);
                 remain_dr--;
             }
         }
 
         //print the status...
-        print_the_status(grid);
-
-
-        for(auto s:round_winners){
-            winners.push_back(s);
-            cout << "congrats player #" << s+1 << "! You got out of this hell!\n";
-        }
-        for(auto s:round_losers){
-            round_losers.push_back(s);
-            cout << "Ops! player #" << s+1 << "! God bless you!\n";
-        }
+        //print_the_status(grid);
     }
 
 
@@ -102,18 +98,22 @@ int main(){
     cout << "Ranking:" << endl;
     int w=0;
     for(; w<winners.size(); w++){
-        cout << w+1 << ".player #" << winners[w] << endl;
+        cout << w+1 << ".player #" << winners[w]+1 << endl;
     }
+    cout << "And dead bodies...\n";
     for(int l=losers.size()-1; l>=0; l--){
-        cout << w++ << ".player #" << losers[l] << endl;
+        cout << ++w << ".player #" << losers[l]+1 << " XXX" << endl;
     }
+    cout << "press 'e' and hit the Enter to end the game!";
+    string meaningless;
+    cin >> meaningless;
     return 0;
 }
 
-intpair drmove(vec2d(char)& grid, const intpair drpos, const int id){       //returns the new coordinate
+intpair drmove(vec2d(char)& grid, const intpair drpos, const int id, vector<int> deservedid, const int round){       //returns the new coordinate
     grid[drpos.first][drpos.second] = 'd';
     print_the_status(grid);
-    intpair dr2pos = get_the_move(grid,drpos.first, drpos.second, id);
+    intpair dr2pos = get_the_move(grid,drpos.first, drpos.second, id, deservedid, round);
     if(dr2pos != drpos){
         grid[drpos.first][drpos.second] = ' ';
         grid[dr2pos.first][dr2pos.second] = 'D';
