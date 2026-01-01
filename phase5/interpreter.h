@@ -2,6 +2,7 @@
 #define INTERPRETER_H
 
 #include "includer.h"
+#include "draftsman.h"
 
 inline void clear_the_screen()
 {
@@ -100,19 +101,20 @@ void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
     cout << string(50, '-') << endl;
 }
 
-intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id, vector<int>& deservedid, int* temp_token, const int round=0){ //returns the coordinate of moved draftsman
+intpair get_the_move(vec2d(char)& grid, draftsman& dr , vector<int>& announcedid, const int round=0){ //returns the coordinate of moved draftsman
     bool wants_to_rest = false;
-    char move;
-    char move2;
-    int new_x = x;
-    int new_y = y;
-    if(!deservedid.empty()){
-        for(auto d:deservedid)    
-        d>0? cout << "congrats player #" << d << "! You got out of this hell!\n" : cout << "Ops! player #" << -d << "! God bless you!\n";
+    char move, move2;
+    int new_x = dr.x, new_y = dr.y;
+    
+    if(!announcedid.empty()){
+        for(auto d:announcedid)    
+            d>0 ? cout << "congrats player #" << d << "! You got out of this hell!\n" 
+            : cout << "Ops! player #" << -d  << "! God bless you!\n";
     }
+
     if(round!=0) cout << "Round " << round <<":==========================\n";
-    cout << "Player #" << id+1 << " (" << (x+1)/2 << ", " << (y+1)/2 << "):"<< endl;
-    while(new_x == x && new_y == y && !wants_to_rest){
+    cout << "Player #" << dr.id+1 << " (" << (dr.x+1)/2 << ", " << (dr.y+1)/2 << "):"<< endl;
+    while(new_x == dr.x && new_y == dr.y && !wants_to_rest){
         cout << "Enter your move (W/A/S/D),Z for sleeping and TW/TA/TS/TD for building temporary walls: ";
         cin >> move;
         if(move == 'T' || move == 't') cin >> move2;
@@ -158,33 +160,33 @@ intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id, ve
                         break;
                     default:
                         cout << "Invlaid move! Please enter  TW, TA, TS, or TD." << endl;
-                        new_x = x;
-                        new_y = y;
+                        new_x = dr.x;
+                        new_y = dr.y;
                         continue;
                 }
                 break;
             default:
                 cout << "Invalid move! Please enter W, A, S, or D." << endl;
-                new_x = x;
-                new_y = y;
+                new_x = dr.x;
+                new_y = dr.y;
                 continue;
         }
 
         //check if the player wants to build a temporary wall
         if(move == 'T' || move == 't'){
-            if(temp_token[id] < k){
-                temp_token[id]++;
+            if(dr.temp_token < dr.token_limit){
+                dr.temp_token++;
                 if(grid[new_x][new_y] == '#' || grid[new_x][new_y] == '2' || grid[new_x][new_y] == '1'){
                     cout << "You can't build the temporary wall there! Try again." << endl;
-                    new_x = x;
-                    new_y = y;
+                    new_x = dr.x;
+                    new_y = dr.y;
                     continue;
                 }
             }
             else{
                 cout << "Your temporary walls token has been limited! Try again." << endl;
-                new_x = x;
-                new_y = y;
+                new_x = dr.x;
+                new_y = dr.y;
                 continue;
             }
         }
@@ -192,35 +194,35 @@ intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id, ve
         //check if the player wants to go out of bounds
         if(new_x < 1 || new_x >= 2*n || new_y < 1 || new_y >= 2*m){
             cout << "Move out of bounds! Try again." << endl;
-            new_x = x;
-            new_y = y;
+            new_x = dr.x;
+            new_y = dr.y;
             continue;
         }
         
         // check if the move is blocked by a wall
-        if(grid[(x + new_x)/2][(y + new_y)/2] == '#'){
+        if(grid[(dr.x + new_x)/2][(dr.y + new_y)/2] == '#'){
             cout << "Move blocked by a wall! Try again." << endl;
-            new_x = x;
-            new_y = y;
+            new_x = dr.x;
+            new_y = dr.y;
             continue;
         }
 
         // check if there aren't any monsters or draftsman in the new position
         if(grid[new_x][new_y] == 'M'){
             cout << "Do you wanna be the snack of a monster? Try again." << endl;
-            new_x = x;
-            new_y = y;
+            new_x = dr.x;
+            new_y = dr.y;
         }
         else {
             if(grid[new_x][new_y] == 'D' || grid[new_x][new_y] == 'd'){
                 cout << "Sorry! every room hasn't got the place for you both. Try again." << endl;
-                new_x = x;
-                new_y = y;
+                new_x = dr.x;
+                new_y = dr.y;
             }
             else if(grid[new_x][new_y] == 'Z'){
                 cout << "He's asleep! Don't make him wake up. Try again." << endl;
-                new_x = x;
-                new_y = y;
+                new_x = dr.x;
+                new_y = dr.y;
             }
         }
     }

@@ -11,7 +11,6 @@ intpair drmove(vec2d(char)& grid, intpair drpos, const int id, vector<int> deser
 intpair mnmove(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 intpair Im_hungry(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 
-//issues temp walls.
 
 int main(){
 
