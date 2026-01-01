@@ -67,3 +67,8 @@ void printGrid(char *grid){
     }
 }
 
+void clearScreen(){
+    for(int i=0; i<80; i++){
+            cout << endl;
+    }
+}
