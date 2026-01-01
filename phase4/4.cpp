@@ -8,7 +8,7 @@ int drnum, mnnum, wlnum;
 intpair light_source_pos;
 vector<intpair> mnpos, drpos;
 
-intpair drmove(vec2d(char)& grid, intpair drpos, const int id, vector<int> announceid,int* temp_token, const int round);
+intpair drmove(vec2d(char)& grid, draftsman& dr, vector<int> deservedid, const int round);
 intpair mnmove(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 intpair Im_hungry(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 
@@ -17,7 +17,7 @@ int main(){
 
     importer();
 
-    n>3 && m>3?(n>m?k=m:k=n):k=1;
+    n>3 && m>3?(n>m?k=m/3:k=n/3):k=1;
 
     vec2d(char) grid(2 * n + 1, vector<char>(2 * m + 1));
     draftsman dr[drnum];

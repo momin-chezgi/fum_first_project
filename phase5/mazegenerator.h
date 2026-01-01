@@ -3,10 +3,7 @@
 
 #include "DSU.h"
 #include "interpreter.h"
-#define cell Node
-#define vec2d(type) vector<vector<type>>
-#define intpair pair<int,int>
-using namespace std;
+#include "includer.h"
 
 /*
  limits of  this variables:
@@ -26,6 +23,8 @@ void put_the_walls(intpair light_source_pos,vec2d(cell) &grid, vec2d(char)& show
 void place_the_draftsmen(vec2d(char) & shown_grid);
 //4.
 void place_the_monsters(vec2d(char) & shown_grid);
+//5.
+void put_the_chance_cubes(vec2d(char) & shown_grid);
 
 // sub-algorithms:
 void create_the_spanning_tree(vec2d(cell) & grid, intpair light_source_pos,vec2d(int) & connected, vec2d(char) & shown_grid);
@@ -85,6 +84,9 @@ int mazegenerator(vec2d(char)& shown_grid, int n_input  = n, int m_input = m,
     
     //4. place the monsters
     place_the_monsters(shown_grid);
+
+    //5. Put the chance cubes
+    put_the_chance_cubes(shown_grid);
 
     remove_dots(shown_grid);
 
@@ -300,32 +302,6 @@ inline void remove_dots(vec2d(char)& shown_grid){
     }
 }
 
-//How to convert between shown_grid and grid?
-//  if we have shown_grid[a][b], iff a%2 != b%2 then this is a wall-place coordinate and [(a != 0||n-1) || (b != 0||m-1)]
-//  To get the corresponding cell coordinates in grid:
-//  case 1: vertical wall(a is odd): the wall is between [(a-1)/2][(b-2)/2] and [(a-1)/2][b/2]
-//  case 2: horizontal wall(b is odd): the wall is between [(a-2)/2][(b-1)/2] and [a/2][(b-1)/2]
-
-pair<intpair,intpair> shown2real_coord(int a, int b, char cell_type){
-    switch (cell_type){
-        case 'W': //wall
-            if(a%2 ==1 && b%2 ==0){ // vertical wall
-                return {{(a-1)/2, (b-2)/2}, {(a-1)/2, b/2}};
-            }
-            else if(a%2 ==0 && b%2 ==1){ // horizontal wall
-                return {{(a-2)/2, (b-1)/2}, {a/2, (b-1)/2}};
-            }
-        break;
-        case 'S': //source
-        case 'D': //draftsman
-        case 'M': //monster
-            if(a%2 ==1 && b%2 ==1){ // cell
-                return {{(a-1)/2, (b-1)/2}, { -1, -1}};
-            }
-        break;
-    }
-    return {{-1,-1},{-1,-1}};    
-}
 
 bool are_there_no_enemy_nearby(vec2d(char) & shown_grid, int i, int j, char cell_type){
     char enemy;
@@ -353,4 +329,18 @@ bool are_there_no_enemy_nearby(vec2d(char) & shown_grid, int i, int j, char cell
     }
     return true;
 }
+
+void put_the_chance_cubes(vec2d(char) & shown_grid){
+    srand(time(0));
+    for(int i=0; i<k;){
+        int x = rand()%n;
+        int y = rand()%m;
+        x = 2*x + 1, y = 2*y + 1;
+        if(shown_grid[x][y] == ' '){
+            shown_grid[x][y] = 'C';
+            i++;
+        }
+    }
+}
+
 #endif // MAZEGENERATOR_H
