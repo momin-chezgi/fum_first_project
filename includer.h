@@ -14,7 +14,7 @@
 #endif
 using namespace std;
 
-extern int n, m;
+extern int n, m, k;
 extern int drnum, mnnum, wlnum;
 
 #endif // INCLUDER_H

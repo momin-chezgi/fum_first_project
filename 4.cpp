@@ -1,22 +1,23 @@
 #include "mazegenerator.h"
 #include "interpreter.h"
 
-int n,m;
+int n,m, k;
 int drnum, mnnum, wlnum;
 
 intpair light_source_pos;
 vector<intpair> mnpos, drpos;
 
-
-intpair drmove(vec2d(char)& grid, intpair drpos, const int id, vector<int> deservedid, const int round);
+intpair drmove(vec2d(char)& grid, intpair drpos, const int id, vector<int> deservedid,int* temp_token, const int round);
 intpair mnmove(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 intpair Im_hungry(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 
-//issues: Ranking, printing round, dead draftsmen and winners.
+//issues temp walls.
 
 int main(){
 
     importer();
+
+    n>3 && m>3?(n>m?k=m:k=n):k=1;
 
     vec2d(char) grid(2 * n + 1, vector<char>(2 * m + 1));
 
@@ -46,8 +47,11 @@ int main(){
     int remain_dr = drnum;
     vector<int> winners;
     vector<int> losers;
+    vector<intpair> temp1;
+    vector<intpair> temp2;
     int round = 1;
     vector<int> deservedid;
+    int temp_token[drnum] = { };
 
     //while there's a draftsman, still working
     while(remain_dr > 0){
@@ -56,9 +60,13 @@ int main(){
         for(int d=0; d<drnum; d++){
             if(ended[d]) continue;
             
-            d==0 ? drpos[d] = drmove(grid, drpos[d], d, deservedid,round)
-                 : drpos[d] = drmove(grid, drpos[d], d, deservedid,0);
+            intpair new_coo;
+            d==0 ? new_coo = drmove(grid, drpos[d], d, deservedid, temp_token ,round)
+                 : new_coo = drmove(grid, drpos[d], d, deservedid, temp_token ,0);
             
+            if(new_coo.first%2 == new_coo.second%2)drpos[d] = new_coo;
+            else{(temp2.push_back(new_coo));} 
+ 
             deservedid.clear();
 
             //When the draftsman reaches the light source, he wins...
@@ -78,7 +86,7 @@ int main(){
         }
 
         //Check if a/some draftsman/men is/are eaten...
-        for(int d=0; d<remain_dr; d++){
+        for(int d=0; d<drnum; d++){
             if(ended[d]) continue;
             if(grid[drpos[d].first][drpos[d].second] == 'M'){
                 ended[d] = true;
@@ -88,19 +96,21 @@ int main(){
             }
         }
 
-        //print the status...
-        //print_the_status(grid);
+        // Reduce the number of temporary walls...
+        for(auto s:temp2) grid[s.first][s.second] = '1';
+        for(auto s:temp1) grid[s.first][s.second] = ' ';
+        temp1 = temp2;
+        temp2.clear();
     }
 
-
+    print_the_status(grid);
     // Announce the final results...
-    cout << 50*'-' << endl;
+    cout << "----------------------------------------" << endl;
     cout << "Ranking:" << endl;
     int w=0;
     for(; w<winners.size(); w++){
         cout << w+1 << ".player #" << winners[w]+1 << endl;
     }
-    cout << "And dead bodies...\n";
     for(int l=losers.size()-1; l>=0; l--){
         cout << ++w << ".player #" << losers[l]+1 << " XXX" << endl;
     }
@@ -110,13 +120,19 @@ int main(){
     return 0;
 }
 
-intpair drmove(vec2d(char)& grid, const intpair drpos, const int id, vector<int> deservedid, const int round){       //returns the new coordinate
+intpair drmove(vec2d(char)& grid, const intpair drpos, const int id, vector<int> deservedid,int* temp_token, const int round){       //returns the new coordinate
     grid[drpos.first][drpos.second] = 'd';
     print_the_status(grid);
-    intpair dr2pos = get_the_move(grid,drpos.first, drpos.second, id, deservedid, round);
+    intpair dr2pos = get_the_move(grid,drpos.first, drpos.second, id, deservedid,temp_token, round);
     if(dr2pos != drpos){
-        grid[drpos.first][drpos.second] = ' ';
-        grid[dr2pos.first][dr2pos.second] = 'D';
+        if(dr2pos.first%2 != dr2pos.second%2){
+            grid[dr2pos.first][dr2pos.second] = '2';
+            grid[drpos.first][drpos.second] = 'D';
+        }
+        else{
+            grid[drpos.first][drpos.second] = ' ';
+            grid[dr2pos.first][dr2pos.second] = 'D';
+        }
     }
     else{
         grid[drpos.first][drpos.second] = 'Z';
@@ -131,20 +147,20 @@ intpair mnmove(vec2d(char)& grid,const intpair mnpos, vec2d(int)& has_seen){
     intpair drpos = Im_hungry(grid, mnpos, has_seen);
     for (int l=0; l<2; l++){
         //If it can close horizantelly...
-        if(drpos.second < mny && grid[mnx][mny - 1] != '#' && mny>2 && grid[mnx][mny-2] != 'S' && grid[mnx][mny-2] != 'M'){
+        if(drpos.second < mny && grid[mnx][mny - 1] == ' ' && mny>2 && grid[mnx][mny-2] != 'S' && grid[mnx][mny-2] != 'M'){
             mny -= 2;
             continue;
         }
-        if(drpos.second > mny && grid[mnx][mny + 1] != '#' && mny<(2*m-2) && grid[mnx][mny+2] != 'S' && grid[mnx][mny+2] != 'M'){
+        if(drpos.second > mny && grid[mnx][mny + 1] == ' ' && mny<(2*m-2) && grid[mnx][mny+2] != 'S' && grid[mnx][mny+2] != 'M'){
             mny += 2;
             continue;
         }
         //else closes vertically...
-        if(drpos.first < mnx && grid[mnx - 1][mny] != '#' && mnx>2 && grid[mnx-2][mny] != 'S' && grid[mnx-2][mny] != 'M'){
+        if(drpos.first < mnx && grid[mnx - 1][mny] == ' ' && mnx>2 && grid[mnx-2][mny] != 'S' && grid[mnx-2][mny] != 'M'){
             mnx -= 2;
             continue;
         }
-        if(drpos.first > mnpos.first && grid[mnx + 1][mny] != '#' && mnx<(2*n-2) && grid[mnx+2][mny] != 'S' && grid[mnx+2][mny] != 'M'){
+        if(drpos.first > mnpos.first && grid[mnx + 1][mny] == ' ' && mnx<(2*n-2) && grid[mnx+2][mny] != 'S' && grid[mnx+2][mny] != 'M'){
             mnx += 2;
             continue;
         }

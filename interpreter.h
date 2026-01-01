@@ -100,9 +100,10 @@ void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
     cout << string(50, '-') << endl;
 }
 
-intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id, vector<int>& deservedid, const int round=0){ //returns the coordinate of moved draftsman
+intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id, vector<int>& deservedid, int* temp_token, const int round=0){ //returns the coordinate of moved draftsman
     bool wants_to_rest = false;
     char move;
+    char move2;
     int new_x = x;
     int new_y = y;
     if(!deservedid.empty()){
@@ -112,8 +113,9 @@ intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id, ve
     if(round!=0) cout << "Round " << round <<":==========================\n";
     cout << "Player #" << id+1 << " (" << (x+1)/2 << ", " << (y+1)/2 << "):"<< endl;
     while(new_x == x && new_y == y && !wants_to_rest){
-        cout << "Enter your move (W/A/S/D) Or Z for nothing: ";
+        cout << "Enter your move (W/A/S/D),Z for sleeping and TW/TA/TS/TD for building temporary walls: ";
         cin >> move;
+        if(move == 'T' || move == 't') cin >> move2;
         switch(move){
             case 'W':
             case 'w':
@@ -135,11 +137,56 @@ intpair get_the_move(vec2d(char)& grid,const int x,const int y, const int id, ve
             case 'z':
                 wants_to_rest = true;
                 break;
+            case 'T':
+            case 't':
+                switch(move2){
+                    case 'W':
+                    case 'w':
+                        new_x -= 1;
+                        break;
+                    case 'A':
+                    case 'a':
+                        new_y -= 1;
+                        break;
+                    case 'S':
+                    case 's':
+                        new_x += 1;
+                        break;
+                    case 'D':
+                    case 'd':
+                        new_y += 1;
+                        break;
+                    default:
+                        cout << "Invlaid move! Please enter  TW, TA, TS, or TD." << endl;
+                        new_x = x;
+                        new_y = y;
+                        continue;
+                }
+                break;
             default:
                 cout << "Invalid move! Please enter W, A, S, or D." << endl;
                 new_x = x;
                 new_y = y;
                 continue;
+        }
+
+        //check if the player wants to build a temporary wall
+        if(move == 'T' || move == 't'){
+            if(temp_token[id] < k){
+                temp_token[id]++;
+                if(grid[new_x][new_y] == '#' || grid[new_x][new_y] == '2' || grid[new_x][new_y] == '1'){
+                    cout << "You can't build the temporary wall there! Try again." << endl;
+                    new_x = x;
+                    new_y = y;
+                    continue;
+                }
+            }
+            else{
+                cout << "Your temporary walls token has been limited! Try again." << endl;
+                new_x = x;
+                new_y = y;
+                continue;
+            }
         }
 
         //check if the player wants to go out of bounds
