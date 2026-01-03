@@ -243,11 +243,11 @@ void magic_transfer(vector<intpair>& mnpos, vec2d(char)& grid){
     cin >> x >> y;
     x = 2*x-1, y = 2*y-1;
     int mnid = coor2id4monster(x,y,mnpos);
-    while(newx==x && newy==y){
+    while(mnid==-1){
         cout << "Try again!(splitted by space):";
         cin >> x >> y;
         x = 2*x-1, y = 2*y-1;
-        int mnid = coor2id4monster(x,y,mnpos);
+        mnid = coor2id4monster(x,y,mnpos);
     }
     newx = x, newy = y;
     while(newx==x && newy==y){

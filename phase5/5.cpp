@@ -50,7 +50,8 @@ int main(){
     vector<int> winners, losers;
     vector<intpair> temp1, temp2;
     vector<int> announceid;
-    int round = 1;
+    int round = 0;
+    bool good_luck = false;
 
     //while there's a draftsman, still working
     while(remain_dr > 0){
@@ -60,10 +61,12 @@ int main(){
             if(dr[d].defeated || dr[d].winned) continue;
             
             intpair new_coo;
-            d==0 ? new_coo = drmove(grid, dr[d], announceid ,round++)
+
+            d==0 && !good_luck ? new_coo = drmove(grid, dr[d], announceid ,++round)
                  : new_coo = drmove(grid, dr[d], announceid ,0);
             
-            bool good_luck = false;
+            good_luck = false;
+            
             if(new_coo.first < 0 && new_coo.second < 0){
                 good_luck = true;
                 new_coo.first *= -1, new_coo.second *= -1;
@@ -103,7 +106,6 @@ int main(){
                         magic_transfer(mnpos, grid);
                         break;
                 }
-                good_luck = false;
             }
         }
 
