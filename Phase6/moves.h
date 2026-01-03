@@ -90,7 +90,6 @@ intpair mnmove(vec2d(char)& grid,const intpair mnpos, vec2d(int)& has_seen){
 
 
 void earthquake(vec2d(char)& grid, vector<draftsman>& draftsman,vector<intpair>& mnpos, int remain_dr){
-    
     srand(time(0));
     for(int d=0; d<remain_dr; d++){
         int newx = draftsman[d].x, newy = draftsman[d].y;

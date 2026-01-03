@@ -62,7 +62,7 @@ struct draftsman
 struct status
 {
     int round=-1;
-    int who_was_the_last=-1;
+    int who_was_the_last=0;
     vector<draftsman> drs;
     vector<intpair> mns;
     intpair lighpos = {-1,-1};

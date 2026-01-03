@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <random>
 #include <vector>
+#include <stdlib.h>
+
 #define cell Node
 #define vec2d(type) vector<vector<type>>
 #define intpair pair<int,int>
@@ -13,6 +15,8 @@
 #include <windows.h>
 #endif
 using namespace std;
+
+#define LINEMAX 37000
 
 extern int n, m, k;
 extern int drnum, mnnum, wlnum;

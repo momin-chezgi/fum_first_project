@@ -1,6 +1,7 @@
 #include "mazegenerator.h"
 #include "moves.h"
 #include "structures.h"
+#include "gamesaver.h"
 
 int n,m, k;
 int drnum, mnnum, wlnum;
@@ -13,6 +14,8 @@ intpair drmove(vec2d(char)& grid, draftsman& dr, vector<int> deservedid, const i
 intpair mnmove(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 intpair Im_hungry(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 
+//It's usefull when the saved game is taken, and in some cases of new games...
+status saved_status;
 
 int main(){
 
@@ -23,28 +26,52 @@ int main(){
     vec2d(char) grid(2 * n + 1, vector<char>(2 * m + 1));
     vector<draftsman> dr(drnum);
     
-    if(!is_saved_game) mazegenerator(grid);
-
-    int p=0;
-    // Make vectors of coordinates of any type
-    for(int i = 0; i < n; i++){
-        for (int j = 0; j < m; j++){
-            int x = 2 * i + 1;
-            int y = 2 * j + 1;
-            switch(grid[x][y]){
-                case 'S':
-                    light_source_pos = {x, y};
-                    break;
-                case 'M':
-                    mnpos.push_back({x, y});
-                    break;
-                case 'D':
-                    dr[p].id = p;
-                    dr[p].x = x, dr[p].y = y;
-                    p++;
-                    break;
+    if(!is_saved_game){
+        mazegenerator(grid);
+        saved_status.who_was_the_last = 0;
+        int p=0;
+        // Make vectors of coordinates of any type
+        for(int i = 0; i < n; i++){
+            for (int j = 0; j < m; j++){
+                int x = 2 * i + 1;
+                int y = 2 * j + 1;
+                switch(grid[x][y]){
+                    case 'S':
+                        light_source_pos = {x, y};
+                        break;
+                    case 'M':
+                        mnpos.push_back({x, y});
+                        break;
+                    case 'D':
+                        dr[p].id = p;
+                        dr[p].x = x, dr[p].y = y;
+                        p++;
+                        break;
+                }
             }
         }
+    }
+    else{
+        dr = saved_status.drs;
+        mnpos = saved_status.mns;
+        light_source_pos = saved_status.lighpos;
+        //bounds...
+        for(int i=0; i<=2*n; i++) grid[i][0] = grid[i][2*n] = '#';
+        for(int j=0; j<=2*m; j++) grid[0][j] = grid[2*m][j] = '#';
+        //vertices...
+        for(int i=2; i<2*n; i++){
+            for(int j=2; j<2*m; j++){
+                if(i%2 != j%2) grid[i][j] = '#';
+            }
+        }
+        
+        //monsters, draftsman, chance cubes, walls, temporary walls...
+        for(auto mn:mnpos) grid[mn.first][mn.second]='M';
+        for(auto d:dr) grid[d.x][d.y] = '#';
+        for(auto c:saved_status.chancecubes) grid[c.first][c.second] = 'C';
+        for(auto w:saved_status.walls) grid[w.first][w.second] = '#';
+        for(auto t2:saved_status.temp2) grid[t2.first][t2.second] = '#';
+        for(auto t1:saved_status.temp1) grid[t1.first][t1.second] = '#';
     }
 
     int remain_dr = drnum;
@@ -52,19 +79,28 @@ int main(){
     vector<intpair> temp1, temp2;
     vector<int> announceid;
     int round = 1;
+    bool good_luck = false;
 
     //while there's a draftsman, still working
     while(remain_dr > 0){
 
         // Draftsmen move one by one
-        for(int d=0; d<drnum; d++){
+        for(int d=saved_status.who_was_the_last; d<drnum; d++){
             if(dr[d].defeated || dr[d].winned) continue;
             
             intpair new_coo;
-            d==0 ? new_coo = drmove(grid, dr[d], announceid ,round++)
+            d==0 && !good_luck? new_coo = drmove(grid, dr[d], announceid ,round++)
                  : new_coo = drmove(grid, dr[d], announceid ,0);
             
-            bool good_luck = false;
+            good_luck = false;
+            
+            // saving the game for playing another time...
+            if(new_coo == make_pair(0,0)){
+                int a = save_the_game();
+                cout << "The game was saved by the id " << a+1 << endl;
+                return 1;
+            }
+
             if(new_coo.first < 0 && new_coo.second < 0){
                 good_luck = true;
                 new_coo.first *= -1, new_coo.second *= -1;

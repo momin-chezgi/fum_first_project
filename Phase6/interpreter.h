@@ -3,12 +3,11 @@
 
 #include "includer.h"
 #include "structures.h"
+#include "gamesaver.h"
 
 inline void clear_the_screen()
 {
-    for(int i=0; i<80; i++){
-        cout << endl;
-    }
+    system("cls");
 }
 
 void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
@@ -23,20 +22,21 @@ void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
     }
     if(chosen == "2"){
         is_saved_game = true;
-        vector<status> games = saved_games();
+        int numofsaved = number_of_games();
         int whichgame = 0;
         cout << "Which one do you play?"<<endl;
-        for(int i=0; i<games.size(); i++) cout << i+1 << ", ";
+        for(int i=0; i<numofsaved; i++) cout << i+1 << ", ";
         cout << endl;
         while(whichgame == 0){
             cin >> whichgame;
-            if(whichgame>=games.size())whichgame=0;
+            if(whichgame<1 || whichgame > numofsaved)whichgame=0;
         }
-
+        saved_game(whichgame-1);
     }
     cout << "remember that rules(n and m are dimensions):" << endl;
     cout << "1. The sum of draftsmen and monsters should be at least 1 and at most (n*m)/9." << endl;
     cout << "2. The number of walls should be at least 0 and at most n*m - n - m." << endl;
+    cout << "3. Any time, quit by pressing the 'Q' word.(and play it at the other time)" << endl;
     cout << "So enter the numbers of draftsmen, monsters and walls(in order): " << endl;
     }
 
@@ -130,13 +130,22 @@ intpair get_the_move(vec2d(char)& grid, draftsman& dr , vector<int>& announcedid
             : cout << "Ops! player #" << -d  << "! God bless you!\n";
     }
 
-    if(round!=0) cout << "Round " << round <<":==========================\n";
+    if(round!=0) cout << "Round " << round <<":============================================\n";
     cout << "Player #" << dr.id+1 << ":  coordinate(" << (dr.x+1)/2 << ", " << (dr.y+1)/2 << ")" << "  remained walls: " << dr.token_limit-dr.temp_token << endl;
     while(new_x == dr.x && new_y == dr.y && !wants_to_rest){
         cout << "Enter your move (W/A/S/D),Z for sleeping and TW/TA/TS/TD for building temporary walls: ";
         cin >> move;
         if(move == 'T' || move == 't') cin >> move2;
         switch(move){
+            case 'Q':
+            case 'q':
+                cout << "Do you want to save the game? Y/N  ";
+                cin >> move2;
+                if(move2 =='Y' || move2 == 'y'){
+                    cout << "Saving the game..." << endl;
+                    return {0,0};
+                }
+                break;
             case 'W':
             case 'w':
                 new_x -= 2;
@@ -261,11 +270,11 @@ void magic_transfer(vector<intpair>& mnpos, vec2d(char)& grid){
     cin >> x >> y;
     x = 2*x-1, y = 2*y-1;
     int mnid = coor2id4monster(x,y,mnpos);
-    while(newx==x && newy==y){
+    while(mnid==-1){
         cout << "Try again!(splitted by space):";
         cin >> x >> y;
         x = 2*x-1, y = 2*y-1;
-        int mnid = coor2id4monster(x,y,mnpos);
+        mnid = coor2id4monster(x,y,mnpos);
     }
     newx = x, newy = y;
     while(newx==x && newy==y){
