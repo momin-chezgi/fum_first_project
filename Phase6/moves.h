@@ -3,7 +3,6 @@
 
 #include "includer.h"
 #include "interpreter.h"
-#include "structures.h"
 
 intpair Im_hungry(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen){
     vector<intpair> breadth1, breadth2;

@@ -1,6 +1,5 @@
 #include "mazegenerator.h"
 #include "moves.h"
-#include "structures.h"
 #include "gamesaver.h"
 
 int n,m, k;
@@ -9,6 +8,7 @@ bool is_saved_game;
 
 intpair light_source_pos;
 vector<intpair> mnpos;
+vector<draftsman> dr;
 
 intpair drmove(vec2d(char)& grid, draftsman& dr, vector<int> deservedid, const int round);
 intpair mnmove(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
@@ -24,7 +24,7 @@ int main(){
     n>3 && m>3?(n>m?k=m/3:k=n/3):k=1;
 
     vec2d(char) grid(2 * n + 1, vector<char>(2 * m + 1));
-    vector<draftsman> dr(drnum);
+    
     
     if(!is_saved_game){
         mazegenerator(grid);
@@ -43,9 +43,7 @@ int main(){
                         mnpos.push_back({x, y});
                         break;
                     case 'D':
-                        dr[p].id = p;
-                        dr[p].x = x, dr[p].y = y;
-                        p++;
+                        dr.push_back(p++, x, y);
                         break;
                 }
             }

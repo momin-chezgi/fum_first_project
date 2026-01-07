@@ -2,7 +2,6 @@
 #define INTERPRETER_H
 
 #include "includer.h"
-#include "structures.h"
 #include "gamesaver.h"
 
 inline void clear_the_screen()
