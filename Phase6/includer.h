@@ -79,7 +79,7 @@ struct draftsman
 struct status
 {
     int round=-1;
-    int who_was_the_last=0;
+    int lastplayer=0;
     vector<draftsman> drs;
     vector<intpair> mns;
     intpair lighpos = {-1,-1};
@@ -97,6 +97,5 @@ extern intpair light_source_pos;
 extern vector<intpair> mnpos;
 
 extern vector<draftsman> dr;
-extern status saved_status;
 
 #endif // INCLUDER_H

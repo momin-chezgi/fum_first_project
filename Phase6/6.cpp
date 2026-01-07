@@ -14,12 +14,11 @@ intpair drmove(vec2d(char)& grid, draftsman& dr, vector<int> deservedid, const i
 intpair mnmove(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 intpair Im_hungry(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 
-//It's usefull when the saved game is taken, and in some cases of new games...
-status saved_status;
+
 
 int main(){
 
-    importer();
+    status saved_status = importer();
 
     n>3 && m>3?(n>m?k=m/3:k=n/3):k=1;
 
@@ -28,9 +27,8 @@ int main(){
     
     if(!is_saved_game){
         mazegenerator(grid);
-        saved_status.who_was_the_last = 0;
         int p=0;
-        // Make vectors of coordinates of any type
+        // Make vectors of coordinates
         for(int i = 0; i < n; i++){
             for (int j = 0; j < m; j++){
                 int x = 2 * i + 1;
@@ -43,7 +41,7 @@ int main(){
                         mnpos.push_back({x, y});
                         break;
                     case 'D':
-                        dr.push_back(p++, x, y);
+                        dr.push_back({p++, x, y});
                         break;
                 }
             }
@@ -83,7 +81,7 @@ int main(){
     while(remain_dr > 0){
 
         // Draftsmen move one by one
-        for(int d=saved_status.who_was_the_last; d<drnum; d++){
+        for(int d=saved_status.lastplayer; d<drnum; d++){
             if(dr[d].defeated || dr[d].winned) continue;
             
             intpair new_coo;
@@ -94,7 +92,15 @@ int main(){
             
             // saving the game for playing another time...
             if(new_coo == make_pair(0,0)){
-                int a = save_the_game();
+                vector<intpair> chancecubes, walls;
+                for(int i=1; i<2*n; i+=2)
+                    for(int j=1; j<2*m; j+=2)
+                        if(grid[i][j]=='C')chancecubes.push_back({i,j});
+                for(int i=2; i<2*n-1; i++)
+                    for(int j=2; j<2*m-1; j++)
+                        if(grid[i][j]=='#')walls.push_back({i,j});
+                status savinggame = {round, d, dr, mnpos, light_source_pos, walls, temp1, temp2, chancecubes};
+                int a = save_the_game(savinggame);
                 cout << "The game was saved by the id " << a+1 << endl;
                 return 1;
             }

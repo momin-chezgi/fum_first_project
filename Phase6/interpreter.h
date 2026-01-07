@@ -9,7 +9,7 @@ inline void clear_the_screen()
     system("cls");
 }
 
-void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
+status importer(bool wellcom = true, int given_n = -1, int given_m = -1,
                   int given_drnum = -1, int given_mnnum = -1){
     clear_the_screen();
     if(wellcom){
@@ -30,7 +30,7 @@ void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
             cin >> whichgame;
             if(whichgame<1 || whichgame > numofsaved)whichgame=0;
         }
-        saved_game(whichgame-1);
+        return load_the_game(whichgame-1);
     }
     cout << "remember that rules(n and m are dimensions):" << endl;
     cout << "1. The sum of draftsmen and monsters should be at least 1 and at most (n*m)/9." << endl;
@@ -116,6 +116,9 @@ void importer(bool wellcom = true, int given_n = -1, int given_m = -1,
 
     cout << "Valid inputs!" << endl;
     cout << string(50, '-') << endl;
+
+    status meaningless;
+    return meaningless;
 }
 
 intpair get_the_move(vec2d(char)& grid, draftsman& dr , vector<int>& announcedid, const int round=0){ //returns the coordinate of moved draftsman
