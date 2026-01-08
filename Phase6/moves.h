@@ -55,7 +55,6 @@ intpair drmove(vec2d(char)& grid, draftsman& dr, vector<int> deservedid, const i
     return {dr2pos.first, dr2pos.second};
 }
 
-
 intpair mnmove(vec2d(char)& grid,const intpair mnpos, vec2d(int)& has_seen){
     int mnx = mnpos.first;
     int mny = mnpos.second;
@@ -89,7 +88,6 @@ intpair mnmove(vec2d(char)& grid,const intpair mnpos, vec2d(int)& has_seen){
 
     return {mnx,mny};
 }
-
 
 void earthquake(vec2d(char)& grid, vector<draftsman>& draftsman,vector<intpair>& mnpos, int remain_dr){
     srand(time(0));

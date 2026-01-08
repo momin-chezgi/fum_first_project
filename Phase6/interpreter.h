@@ -4,9 +4,9 @@
 #include "includer.h"
 #include "gamesaver.h"
 
-inline void clear_the_screen()
+void clear_the_screen()
 {
-    system("cls");
+    for(int i=0; i<80; i++) cout << endl;
 }
 
 status importer(bool wellcom = true, int given_n = -1, int given_m = -1,

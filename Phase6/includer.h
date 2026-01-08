@@ -21,10 +21,7 @@ using namespace std;
 
 struct Node
 {
-    // Node* parent = this;
-    // Node() : parent(this) {}
-    // Node(const Node&) = delete;
-    // Node& operator = (const Node&) = delete;
+
     int x = 0;
     int y = 0;
     int xp = 0;
@@ -57,12 +54,6 @@ struct Node
         }
     }
 
-    // bool isConnected(Node* other)
-    // {
-    //     this->find();
-    //     other->find();
-    //     return this->parent == other->parent;
-    // }
 };
 
 struct draftsman
@@ -71,7 +62,7 @@ struct draftsman
     int x = -1;
     int y = -1;
     int temp_token = 0;
-    int token_limit = k;
+    int token_limit = 0;
     bool winned = false;
     bool defeated = false;
 };

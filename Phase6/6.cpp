@@ -14,17 +14,7 @@ intpair drmove(vec2d(char)& grid, draftsman& dr, vector<int> deservedid, const i
 intpair mnmove(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 intpair Im_hungry(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 
-
-
-int main(){
-
-    status saved_status = importer();
-
-    n>3 && m>3?(n>m?k=m/3:k=n/3):k=1;
-
-    vec2d(char) grid(2 * n + 1, vector<char>(2 * m + 1));
-    
-    
+void prepare_the_grid(vec2d(char)& grid, status& saved_status){
     if(!is_saved_game){
         mazegenerator(grid);
         int p=0;
@@ -70,18 +60,21 @@ int main(){
         for(auto t1:saved_status.temp1) grid[t1.first][t1.second] = '#';
     }
 
+}
+
+int play_the_game(vector<int>& winners, vector<int>& losers, vec2d(char)& grid, status savedstatus = status{}){
     int remain_dr = drnum;
-    vector<int> winners, losers;
     vector<intpair> temp1, temp2;
     vector<int> announceid;
     int round = 1;
     bool good_luck = false;
-
+    int d;
+    is_saved_game ? d = savedstatus.lastplayer : d = 0;
     //while there's a draftsman, still working
     while(remain_dr > 0){
 
         // Draftsmen move one by one
-        for(int d=saved_status.lastplayer; d<drnum; d++){
+        for(; d<drnum; d++){
             if(dr[d].defeated || dr[d].winned) continue;
             
             intpair new_coo;
@@ -102,7 +95,7 @@ int main(){
                 status savinggame = {round, d, dr, mnpos, light_source_pos, walls, temp1, temp2, chancecubes};
                 int a = save_the_game(savinggame);
                 cout << "The game was saved by the id " << a+1 << endl;
-                return 1;
+                return 1;       // The game has been saved
             }
 
             if(new_coo.first < 0 && new_coo.second < 0){
@@ -170,9 +163,34 @@ int main(){
         for(auto s:temp1) grid[s.first][s.second] = ' ';
         temp1 = temp2;
         temp2.clear();
+
+        d=0;
     }
+    return 0;   // The game has been ended
+}
+
+inline void init_k(){
+    // k is the first limit of temperoray wall
+    // k = max( min(n,m), 1)
+    n>3 && m>3?(n>m?k=m/3:k=n/3):k=1;
+}
+
+int main(){
+
+    status saved_status = importer();
+
+    vec2d(char) grid(2 * n + 1, vector<char>(2 * m + 1));
+    vector<int> winners, losers;
+
+    init_k();
+    
+    prepare_the_grid(grid, saved_status);
+    
+    play_the_game(winners, losers, grid);
 
     print_the_status(grid);
+
     print_the_ranking(winners, losers);
+
     return 0;
 }
