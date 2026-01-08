@@ -1,18 +1,14 @@
 #include "mazegenerator.h"
 #include "moves.h"
-#include "gamesaver.h"
+#include "saveandload.h"
 
 int n,m, k;
 int drnum, mnnum, wlnum;
 bool is_saved_game;
 
 intpair light_source_pos;
-vector<intpair> mnpos;
+vector<intpair> mnpos; 
 vector<draftsman> dr;
-
-intpair drmove(vec2d(char)& grid, draftsman& dr, vector<int> deservedid, const int round);
-intpair mnmove(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
-intpair Im_hungry(vec2d(char)& grid, intpair mnpos, vec2d(int)& has_seen);
 
 void prepare_the_grid(vec2d(char)& grid, status& saved_status){
     if(!is_saved_game){
@@ -31,13 +27,15 @@ void prepare_the_grid(vec2d(char)& grid, status& saved_status){
                         mnpos.push_back({x, y});
                         break;
                     case 'D':
-                        dr.push_back({p++, x, y});
+                        dr.push_back({p++, x, y, 0, k, 0, 0});
                         break;
                 }
             }
         }
     }
     else{
+        n = saved_status.n;
+        m = saved_status.m;
         dr = saved_status.drs;
         mnpos = saved_status.mns;
         light_source_pos = saved_status.lighpos;
@@ -91,8 +89,8 @@ int play_the_game(vector<int>& winners, vector<int>& losers, vec2d(char)& grid, 
                         if(grid[i][j]=='C')chancecubes.push_back({i,j});
                 for(int i=2; i<2*n-1; i++)
                     for(int j=2; j<2*m-1; j++)
-                        if(grid[i][j]=='#')walls.push_back({i,j});
-                status savinggame = {round, d, dr, mnpos, light_source_pos, walls, temp1, temp2, chancecubes};
+                        if( (i-j)%2 != 0 && grid[i][j]=='#')walls.push_back({i,j});
+                status savinggame = {round, d, dr, mnpos, light_source_pos, walls, temp1, temp2, chancecubes, n, m};
                 int a = save_the_game(savinggame);
                 cout << "The game was saved by the id " << a+1 << endl;
                 return 1;       // The game has been saved

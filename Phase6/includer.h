@@ -78,6 +78,8 @@ struct status
     vector<intpair> temp1;
     vector<intpair> temp2;
     vector<intpair> chancecubes;
+    int n=3;
+    int m=3;
 };
 
 extern int n, m, k;

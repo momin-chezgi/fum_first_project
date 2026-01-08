@@ -1,5 +1,5 @@
-#ifndef GAMESAVER
-#define GAMESAVER
+#ifndef SAVEANDLOAD
+#define SAVEANDLOAD
 
 #include "includer.h"
 
@@ -16,21 +16,18 @@ status load_the_game(int a){
     char linebuf[LINEMAX];
 
     fgets(linebuf,LINEMAX, fptr);       //number of saved games
-    for(int i=0; i<9*a-9; i++) fgets(linebuf, LINEMAX, fptr);
-    fgets(linebuf, LINEMAX, fptr);      //index of the game
-
-    if(atoi(linebuf)!=a) cerr << "Fetching Error: in load_the_game()";
+    for(int i=0; i<11*a; i++) fgets(linebuf, LINEMAX, fptr);
 
     is_saved_game = true;
     status savedgame;
     
-    // 1. The number of rounds
+    // 1. The number of round
     fgets(linebuf, LINEMAX, fptr);
     savedgame.round = atoi(linebuf);
 
     // 2. The last player that it was his turn
     fgets(linebuf, LINEMAX, fptr);
-    savedgame.round = atoi(linebuf);
+    savedgame.lastplayer = atoi(linebuf);
 
 
     // 3. The numbers of the draftsmen and their infos: 
@@ -52,7 +49,7 @@ status load_the_game(int a){
     }
 
     // 5. The coordinate of the light source: <x,y>
-    fscanf(fptr, "<x,y>\n", &savedgame.lighpos.first, &savedgame.lighpos.second);
+    fscanf(fptr, "<%d,%d>\n", &savedgame.lighpos.first, &savedgame.lighpos.second);
 
     // 6. The numbers of walls and their coordinates: <x,y>
     fscanf(fptr, "%d ", &wlnum);
@@ -84,23 +81,48 @@ status load_the_game(int a){
         fscanf(fptr, "<%d,%d> ", &x, &y);
         savedgame.chancecubes.push_back({x,y});
     }
+
+    // 10,11. dimensions of the grid
+    fscanf(fptr, "%d\n%d", &savedgame.n, &savedgame.m);
     fclose(fptr);
     return savedgame;
 }
 
-int update_number_of_games(){   //returns the number of saved games
-    FILE* datap = fopen("data.txt","r");
+int update_number_of_games() {
+    FILE* datap = fopen("data.txt", "r");
     FILE* tempp = fopen("temp.txt", "w");
-    char linebuf[LINEMAX];
-    int saved_gamenum = atoi(linebuf);
-    fgets(linebuf, LINEMAX, datap);
-    fprintf(tempp, "%d\n", atoi(linebuf));
-    while(fgets(linebuf, LINEMAX, datap)){
-        fprintf(tempp, "%s",linebuf);
+    if(datap == NULL || tempp == NULL){
+        cerr << "Error: Files don't open...\n";
+        exit(-1);
     }
+    char linebuf[LINEMAX];
+    
+    // Get the number of games
+    fgets(linebuf, LINEMAX, datap);
+    int saved_gamenum = atoi(linebuf);
+
+    // Write INCREMENTED count to temp.txt
+    fprintf(tempp, "%d\n", saved_gamenum + 1);  
+    
+    // Copy the rest of data.txt to temp.txt
+    while(fgets(linebuf, LINEMAX, datap)) {
+        fprintf(tempp, "%s", linebuf);
+    }
+    
     fclose(datap);
     fclose(tempp);
-    return saved_gamenum;
+
+    // Copy back from temp.txt to data.txt
+    datap = fopen("data.txt", "w");
+    tempp = fopen("temp.txt", "r");
+    while(fgets(linebuf, LINEMAX, tempp)) {
+        fprintf(datap, "%s", linebuf);
+    }
+
+    fclose(datap);
+    fclose(tempp);
+    
+    return saved_gamenum;  // Returns the OLD count
 }
 
 int save_the_game(status& game){    //returns the index of the last-appended game
@@ -117,7 +139,7 @@ int save_the_game(status& game){    //returns the index of the last-appended gam
     if(fptr==NULL)return -1;
 
     // 1. The number of round
-    fprintf(fptr, "%d\n", game.round);
+    fprintf(fptr, "%d\n", game.round-1);
     
     // 2. The last player that it was his turn
     fprintf(fptr, "%d\n", game.lastplayer);
@@ -138,9 +160,9 @@ int save_the_game(status& game){    //returns the index of the last-appended gam
         fprintf(fptr, "<%d,%d> ",game.mns[i].first,game.mns[i].second);
     }
     fprintf(fptr, "\n");
-    
+
     // 5. The coordinate of the light source: <x,y>
-    fprintf(fptr, "<%d,%d>\n", &game.lighpos.first, &game.lighpos.second);
+    fprintf(fptr, "<%d,%d>\n", game.lighpos.first, game.lighpos.second);
 
     // 6. The numbers of walls and their coordinates: <x,y>
     fprintf(fptr, "%d ", wlnum);
@@ -162,10 +184,13 @@ int save_the_game(status& game){    //returns the index of the last-appended gam
     for(int i=0; i<game.chancecubes.size(); i++) fprintf(fptr, "<%d,%d> ", game.chancecubes[i].first, game.chancecubes[i].second);
     fprintf(fptr, "\n");
 
+    // 10,11. dimensions of the grid
+    fprintf(fptr, "%d\n", game.n);
+    fprintf(fptr, "%d\n", game.m);
 
     fclose(fptr);
 
     return gamenum;
 }
 
-#endif //GAMESAVER
+#endif //SAVEANDLOAD
