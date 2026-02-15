@@ -117,8 +117,7 @@ status importer(bool wellcom = true, int given_n = -1, int given_m = -1,
     cout << "Valid inputs!" << endl;
     cout << string(50, '-') << endl;
 
-    status meaningless;
-    return meaningless;
+    return status{};
 }
 
 intpair get_the_move(vec2d(char)& grid, draftsman& dr , vector<int>& announcedid, const int round=0){ //returns the coordinate of moved draftsman
@@ -141,11 +140,15 @@ intpair get_the_move(vec2d(char)& grid, draftsman& dr , vector<int>& announcedid
         switch(move){
             case 'Q':
             case 'q':
-                cout << "Do you want to save the game? Y/N  ";
+                cout << "Quit: do you want to save the game? Y/N  ";
                 cin >> move2;
-                if(move2 =='Y' || move2 == 'y'){
-                    cout << "Saving the game..." << endl;
+                if(move2 == 'Y' || move2 == 'y'){
+                    cout << "Saving the game...\n";
                     return {0,0};
+                }
+                if(move2 == 'N' || move2 == 'n'){
+                    cout << "Quit the game..,\n";
+                    return {0,-1};
                 }
                 break;
             case 'W':
@@ -188,14 +191,14 @@ intpair get_the_move(vec2d(char)& grid, draftsman& dr , vector<int>& announcedid
                         new_y += 1;
                         break;
                     default:
-                        cout << "Invlaid move! Please enter  TW, TA, TS, or TD." << endl;
+                        cout << "Invlaid move! Please enter  TW, TA, TS, or TD.\n";
                         new_x = dr.x;
                         new_y = dr.y;
                         continue;
                 }
                 break;
             default:
-                cout << "Invalid move! Please enter W, A, S, or D." << endl;
+                cout << "Invalid move! Please enter W, A, S, or D.\n";
                 new_x = dr.x;
                 new_y = dr.y;
                 continue;
@@ -203,7 +206,7 @@ intpair get_the_move(vec2d(char)& grid, draftsman& dr , vector<int>& announcedid
 
         //check if the player wants to build a temporary wall
         if(move == 'T' || move == 't'){
-            if(dr.temp_token <= dr.token_limit){
+            if(dr.temp_token < dr.token_limit){
                 dr.temp_token++;
                 if(grid[new_x][new_y] == '#' || grid[new_x][new_y] == '2' || grid[new_x][new_y] == '1'){
                     cout << "You can't build the temporary wall there! Try again." << endl;
@@ -365,7 +368,7 @@ void print_the_ranking(vector<int>& winners, vector<int>& losers){
     for(int l=losers.size()-1; l>=0; l--){
         cout << ++w << ".player #" << losers[l]+1 << " XXX" << endl;
     }
-    cout << "press 'e' and hit the Enter to end the game!";
+    cout << "press 'e' and hit the Enter to end the game! ";
     string meaningless;
     cin >> meaningless;
 }

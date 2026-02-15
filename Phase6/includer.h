@@ -73,7 +73,7 @@ struct status
     int lastplayer=0;
     vector<draftsman> drs;
     vector<intpair> mns;
-    intpair lighpos = {-1,-1};
+    vector<intpair> lighpos;
     vector<intpair> walls;
     vector<intpair> temp1;
     vector<intpair> temp2;

@@ -2,6 +2,7 @@
 #define SAVEANDLOAD
 
 #include "includer.h"
+#include <cstring>
 
 int number_of_games(){
     FILE* fptr = fopen("data.txt", "r");
@@ -11,81 +12,100 @@ int number_of_games(){
     return numofgames;
 }
 
-status load_the_game(int a){
-    FILE* fptr = fopen("data.txt", "r");
+bool read_int(FILE* fptr, int* out){
+    char linebuf[LINEMAX];
+    if(!fgets(linebuf, LINEMAX, fptr)) return false;
+    return sscanf(linebuf, "%d", out) == 1;
+}
+
+bool read_intpairs(FILE* fptr, vector<intpair>& out){
+    char linebuf[LINEMAX];
+    if(!fgets(linebuf, LINEMAX, fptr)) return false;
+
+    char* p = linebuf;
+    int count = 0;
+    sscanf(p, "%d", &count);
+    p = strchr(p, '<');
+    for(int i=0; i<count; i++){
+        int x, y;
+        if(sscanf(p, " <%d,%d>", &x, &y) != 2) return false;
+        out.push_back({x,y});
+        p = strchr(p, '>') + 1;
+    }
+    return true;
+}
+
+bool read_draftsmen(FILE* fptr, vector<draftsman>& out){
+    char linebuf[LINEMAX];
+    if(!fgets(linebuf, LINEMAX, fptr)) return false;
+
+    char* p = linebuf;
+    int count = 0;
+    sscanf(p, "%d", &count);
+    p = strchr(p, '<')-1;
+    for(int i=0; i<count; i++){
+        int id, x, y, temp_token, token_limit, winned, defeated;
+        if(sscanf(p, " <%d,%d,%d,%d,%d,%d,%d>",
+                    &id, &x, &y, &temp_token, &token_limit, &winned, &defeated ) != 7) return false;
+        out.emplace_back(draftsman{id,x,y,temp_token,token_limit,(bool)winned,(bool)defeated});
+        p = strchr(p, '>') + 1;
+    }
+    return true;
+}
+
+inline void skip_games(FILE* fptr, int index){
+    char linebuf[LINEMAX];
+    for(int i=0; i<11*index+1; i++){
+        fgets(linebuf, LINEMAX, fptr);
+    }
+}
+
+status load_the_game(int index){
+    is_saved_game = true;
+    status savedg;
+
+    FILE* fptr = fopen("data.txt", "r"); 
     char linebuf[LINEMAX];
 
-    fgets(linebuf,LINEMAX, fptr);       //number of saved games
-    for(int i=0; i<11*a; i++) fgets(linebuf, LINEMAX, fptr);
+    skip_games(fptr, index);
 
-    is_saved_game = true;
-    status savedgame;
     
     // 1. The number of round
-    fgets(linebuf, LINEMAX, fptr);
-    savedgame.round = atoi(linebuf);
+    read_int(fptr, &savedg.round);
 
     // 2. The last player that it was his turn
-    fgets(linebuf, LINEMAX, fptr);
-    savedgame.lastplayer = atoi(linebuf);
-
+    read_int(fptr, &savedg.lastplayer);
 
     // 3. The numbers of the draftsmen and their infos: 
     // <id,x,y,temp_token,token_limit,winned,defeated>
-    fscanf(fptr, "%d", &drnum);
-    int id, x, y, temp_token, token_limit, winned, defeated;
-    for(int i=0; i<drnum; i++){
-        fscanf(fptr, "<%d,%d,%d,%d,%d,%d,%d> ",
-        &id, &x, &y, &temp_token,
-        &token_limit, &winned, &defeated);
-        savedgame.drs.emplace_back(
-            draftsman{id, x, y, temp_token, token_limit, (bool)winned, (bool)defeated});
-    }
+    read_draftsmen(fptr, savedg.drs);
 
     // 4. The numbers of the monsters and their coordinates: <x,y>
-    fscanf(fptr, "%d", &mnnum);
-    for(int i=0; i<mnnum; i++){
-        fscanf(fptr, "<%d,%d> ",&savedgame.mns[i].first,&savedgame.mns[i].second);
-    }
+    read_intpairs(fptr, savedg.mns);
 
     // 5. The coordinate of the light source: <x,y>
-    fscanf(fptr, "<%d,%d>\n", &savedgame.lighpos.first, &savedgame.lighpos.second);
+    read_intpairs(fptr, savedg.lighpos);
 
     // 6. The numbers of walls and their coordinates: <x,y>
-    fscanf(fptr, "%d ", &wlnum);
-    for(int i=0; i<wlnum; i++) {
-        fprintf(fptr, "<%d,%d> ",&x , &y);
-        savedgame.walls.push_back({x,y});
-    }
+    read_intpairs(fptr, savedg.walls);
 
     // 7. The numerbs of 2-round walls and their coordinates: <x,y>
-    int temp2num;
-    fscanf(fptr, "%d ", &temp2num);
-    for(int i=0; i<temp2num; i++){
-        fscanf(fptr, "<%d,%d> ", &x, &y);
-        savedgame.temp2.push_back({x,y});
-    }
+    read_intpairs(fptr, savedg.temp2);
 
     // 8. The numbers of 1-round walls and their coordinates: <x,y>
-    int temp1num;
-    fscanf(fptr, "%d ", &temp1num);
-    for(int i=0; i<temp1num; i++){
-        fscanf(fptr, "<%d,%d> ",&x, &y);
-        savedgame.temp1.push_back({x,y});
-    }
+    read_intpairs(fptr, savedg.temp1);
 
     // 9. The numbers of the chance cubes and their coordinates: <x,y>
-    int chancecubenum;
-    fscanf(fptr, "%d ", &chancecubenum);
-    for(int i=0; i<chancecubenum; i++){
-        fscanf(fptr, "<%d,%d> ", &x, &y);
-        savedgame.chancecubes.push_back({x,y});
-    }
+    read_intpairs(fptr, savedg.chancecubes);
 
     // 10,11. dimensions of the grid
-    fscanf(fptr, "%d\n%d", &savedgame.n, &savedgame.m);
+    read_int(fptr, &savedg.n);
+    read_int(fptr, &savedg.m);
+    
+
     fclose(fptr);
-    return savedgame;
+
+    return savedg;
 }
 
 int update_number_of_games() {
@@ -162,7 +182,7 @@ int save_the_game(status& game){    //returns the index of the last-appended gam
     fprintf(fptr, "\n");
 
     // 5. The coordinate of the light source: <x,y>
-    fprintf(fptr, "<%d,%d>\n", game.lighpos.first, game.lighpos.second);
+    fprintf(fptr, "1 <%d,%d>\n", game.lighpos[0].first, game.lighpos[0].second);
 
     // 6. The numbers of walls and their coordinates: <x,y>
     fprintf(fptr, "%d ", wlnum);

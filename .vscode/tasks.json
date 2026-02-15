@@ -4,15 +4,21 @@
         {
             "type": "cppbuild",
             "label": "C/C++: g++ build active file",
-            "command": "C:\\msys64\\mingw64\\bin\\g++.exe",
+            "command": "g++", 
             "args": [
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}/${fileBasenameNoExtension}${exeExtension}.exe"
             ],
             "options": {
                 "cwd": "${fileDirname}"
+            },
+            "windows": {
+                "command": "C:\\msys64\\mingw64\\bin\\g++.exe"
+            },
+            "linux": {
+                "command": "/usr/bin/g++"
             },
             "problemMatcher": ["$gcc"],
             "group": {
